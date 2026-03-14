@@ -1,0 +1,898 @@
+# inoMS/InteractiveOperations/views.py
+from http.client import responses
+from rest_framework import status
+
+from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse
+from django.utils.translation import gettext_lazy as _
+import logging
+
+from core.auth_tools import permissions
+from core.auth_tools.loaders import ActorModel, current_user
+from core.responses import Response
+from core.open_api import open_api_change_log, open_api_response
+
+from InteractiveOperations import serializers, logics, swagger_example_values
+
+from InteractiveOperations import inoSerializers as inoSerializers
+from InteractiveOperations import models as models
+
+from django.db.models import Avg
+
+logger = logging.getLogger(__name__)
+
+"""
+****************************************** Test Api *******************************************************************
+"""
+class TestToken(APIView):
+    permission_classes = [permissions.IsUser]
+
+    def get(self, request, *args, **kwargs):
+        user: ActorModel | None = current_user(request=request)
+        data = user.jsonifier()
+
+        return Response(
+            data=data,
+            message='OK',
+            status=status.HTTP_200_OK,
+        )
+
+class TestApi(APIView):
+    # permission_classes = [permissions.IsAdmin]
+
+    @extend_schema(
+            tags=["Admin: Test Api - Code:Prf-16"],
+        summary="this is sample for create api in django structure",
+        description=f"""
+           Last Version Update: 1.0.0
+
+           SRS Codes:
+           افزودن فرایند
+           Adm-Prf-16N4
+
+
+           Change Log:
+           [Explanation about endpoint changes in endpoint]
+           {open_api_change_log.test_api}
+           -------------------------------------------------------------------------------------------------------------
+
+           Description of endpoint:
+           ..................
+           
+           **Note: 
+           - add note for front-end, tester, .....
+           - ..............
+
+           """,
+        parameters=[
+            OpenApiParameter(name="actor_type", type=str, required=True,
+                             enum=['User', 'Admin', 'University', 'Industry', 'Business']),
+            OpenApiParameter(name="actor_ids", type=str, required=True, default=None),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='create instance by model name response',
+                examples=[
+                    OpenApiExample(
+                        'create instance by model name Example',
+                        value=swagger_example_values.create_instance_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        actor_type = self.request.GET.get('actor_type', None)
+
+        actor_ids = self.request.GET.get('actor_ids', None)
+        actor_ids = list(map(int, actor_ids.split(',')))
+
+        user: ActorModel | None = current_user(request=request)
+
+        result = logics.TestNameClass.test_function_name(
+            actor_id=int(user.id),  # This variable is actually the actor_id of the logged in admin.
+            actor_type=actor_type,
+            actor_ids=actor_ids,
+        )
+
+        return Response(
+            message=_('successfully created.'),
+            data=result,
+            status=status.HTTP_201_CREATED,
+        )
+#post & put & patch ba estefade az json body anjam shavad
+#delete & get ba estefade az query param anjam shavad
+
+#file response app core
+# translate
+"""
+****************************************** Follow/Unfollow model *******************************************************************
+"""
+class FollowView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+            tags=["All actor: Follow/unfollow an entitiy - Code: 1-53-1"],
+        summary="Follow/Unfollow user/industry/university/business/service/product by actor",
+        description=f"""
+           Last Version Update: 1.0.0
+
+           SRS Codes: 
+           دنبال کردن توسط کاربر یا سرویس دهنده
+           USR1-53-1N1, Asr1-53-1N1
+
+           Change Log:
+           [Explanation about endpoint changes in endpoint]
+
+           Description of endpoint:
+           "Get actor_id, actor_type, target_id, target_type و is_active from user/service provider."
+           "If there is no record, create new record. else, is_active will be updated."
+           """,
+
+        request=inoSerializers.follow.FollowSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example of follow and unfollow',
+                examples=[
+                    OpenApiExample(
+                        'Correct follow Example',
+                        value=swagger_example_values.create_follow_example_successful,
+                    ),
+                    OpenApiExample(
+                        'Correct unfollow Example',
+                        value=swagger_example_values.create_unfollow_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = inoSerializers.follow.FollowSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        actor_id = serializer.validated_data['actor_id']
+        actor_type = serializer.validated_data['actor_type']
+        target_id = serializer.validated_data['target_id']
+        target_type = serializer.validated_data['target_type']
+        is_active = serializer.validated_data['is_active']
+
+        obj, created = models.Follow.objects.get_or_create(
+            actor_id=actor_id,
+            actor_type=actor_type,
+            target_id=target_id,
+            target_type=target_type,
+            defaults={'is_active': is_active},
+        )
+        if not created:
+            obj.is_active = is_active
+            obj.save()
+
+        return Response(inoSerializers.follow.FollowSerializer(obj).data, status=status.HTTP_200_OK)
+"""
+****************************************** Like/Dislike model *******************************************************************
+"""
+class LikeView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+            tags=["All actor: Like/Dislike an entity - Code: 1-53-1"],
+        summary="Like/Dislike user/industry/university/business/service/product/comment by actor",
+        description=f"""
+           Last Version Update: 1.0.0
+
+           SRS Codes: 
+           ایجاد یا تغییر ری اکشن روی یک موجودیت توسط کاربر/سرویس دهنده
+           USR1-53-1N2, Asr1-53-1N2, USR1-53-1N3, Asr1-53-1N3
+           
+           Change Log:
+           [Explanation about endpoint changes in endpoint]
+
+           Description of endpoint:
+           "Get actor_id, actor_type, target_id, target_type و like_status from user/service provider. "
+            "If there is no record, create new record. else, like_status will be updated."
+           """,
+        request=inoSerializers.like.LikeSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description= 'Example for create Like/Dislike or remove reaction on target',
+                examples=[
+                    OpenApiExample(
+                        'Create or update request to create like Example',
+                        value=swagger_example_values.create_like_example_successful,
+                    ),
+                    OpenApiExample(
+                        'Create or update request to create dislike Example',
+                        value=swagger_example_values.create_dislike_example_successful,
+                    ),
+                    OpenApiExample(
+                        'Update request to remove reaction Example',
+                        value=swagger_example_values.update_to_none_reaction_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = inoSerializers.like.LikeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        actor_id = serializer.validated_data['actor_id']
+        actor_type = serializer.validated_data['actor_type']
+        target_id = serializer.validated_data['target_id']
+        target_type = serializer.validated_data['target_type']
+        like_status = serializer.validated_data['like_status']
+
+        obj, created = models.Like.objects.get_or_create(
+            actor_id=actor_id,
+            actor_type=actor_type,
+            target_id=target_id,
+            target_type=target_type,
+            defaults={'like_status': like_status},
+        )
+        if not created:
+            obj.status = like_status
+            obj.save()
+
+        return Response(inoSerializers.like.LikeSerializer(obj).data, status=status.HTTP_200_OK)
+"""
+****************************************** Share model *******************************************************************
+"""
+class ShareView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+            tags=["All actor: Share entity - Code: 1-53-1"],
+        summary="Share user/industry/university/business/service/product page by actor",
+        description=f"""
+           Last Version Update: 1.0.0
+
+           SRS Codes:
+           به اشتراک گذاری در سایت 
+           USR1-53-1N4, Asr1-53-1N4 
+           به اشتراک گذاری در دیگر پلتفرم ها
+           USR1-53-1N5, Asr1-53-1N5
+           
+           Change Log:
+           [Explanation about endpoint changes in endpoint]
+           
+           Description of endpoint:
+           "Get actor_id, actor_type, target_id, target_type, platform, destination_type و destination_id, url, reason from user/service provider."
+            "Create new record."
+            "destination_id, destination_type and reason could be null."
+           """,
+
+        request = inoSerializers.share.ShareSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to create Share base on platform',
+                examples=[
+                    OpenApiExample(
+                        'Create share in site Example',
+                        value=swagger_example_values.create_share_in_site_with_reason_example_successful,
+                    ),
+                    OpenApiExample(
+                        'Create share in site without reason Example',
+                        value=swagger_example_values.create_share_in_site_without_reason_example_successful,
+                    ),
+                    OpenApiExample(
+                        'Create share to telegram app Example',
+                        value=swagger_example_values.create_share_on_telegram_example_successful,
+                    ),
+                    OpenApiExample(
+                        'Create share to whatsapp app Example',
+                        value=swagger_example_values.create_share_on_whatsapp_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = inoSerializers.share.ShareSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        actor_id = serializer.validated_data['actor_id']
+        actor_type = serializer.validated_data['actor_type']
+        target_id = serializer.validated_data['target_id']
+        target_type = serializer.validated_data['target_type']
+        platform = serializer.validated_data['platform']
+        destination_type = serializer.validated_data.get('destination_type', None)
+        destination_id = serializer.validated_data.get('destination_id', None)
+        url = serializer.validated_data.get('url')
+        reason = serializer.validated_data.get('reason', None)
+
+        obj, created = models.Share.objects.get_or_create(
+            actor_id=actor_id,
+            actor_type=actor_type,
+            target_id=target_id,
+            target_type=target_type,
+            defaults={
+                'platform': platform,
+                'destination_type': destination_type,
+                'destination_id': destination_id,
+                'url': url,
+                'reason': reason,
+            },
+        )
+        if not created:
+            obj.actor_id = actor_id
+            obj.actor_type = actor_type
+            obj.target_id = target_id
+            obj.target_type = target_type
+            obj.platform = platform
+            obj.destination_type = destination_type
+            obj.destination_id = destination_id
+            obj.url = url
+            obj.reason = reason
+            obj.save()
+
+        return Response(inoSerializers.share.ShareSerializer(obj).data, status=status.HTTP_200_OK)
+"""
+****************************************** Score model *******************************************************************
+"""
+class ScoreView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+            tags=["All actor: Score entity - Code: 1-53-1"],
+        summary="Score to industry/university/business/service/product by actor",
+        description=f"""
+        Last Version Update: 1.0.0
+
+        SRS Codes:
+        امتیازدهی به موجودیت توسط کاربر یا سرویس دهنده
+        Usr1-53-1N6, Asr1-53-1N6
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+        
+        Description of endpoint:
+        "Get actor_id, actor_type, target_id, target_type و score from user/service provider. "
+        "If there is no record, creates new record. else, score will be updated."
+        """,
+
+        request=inoSerializers.score.ScoreSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to score to',
+                examples=[
+                    OpenApiExample(
+                        'create score Example',
+                        value=swagger_example_values.create_score_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = inoSerializers.score.ScoreSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        actor_id = serializer.validated_data['actor_id']
+        actor_type = serializer.validated_data['actor_type']
+        target_id = serializer.validated_data['target_id']
+        target_type = serializer.validated_data['target_type']
+        score = serializer.validated_data['score']
+
+        obj, created = models.Score.objects.get_or_create(
+            actor_id=actor_id,
+            actor_type=actor_type,
+            target_id=target_id,
+            target_type=target_type,
+            defaults={'score': score},
+        )
+        if not created:
+            obj.score = score
+            obj.save()
+
+        return Response(inoSerializers.score.ScoreSerializer(obj).data, status=status.HTTP_200_OK)
+"""
+****************************************** Average score (get) *******************************************************************
+"""
+class ScoreAverageView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+            tags=["All actor: Score entity - Code: 1-53-1"],
+        summary="View Average score of industry/university/business/service/product",
+        description=f"""  
+        Last Version Update: 1.0.0
+
+        SRS Codes:
+        مشاهده میانگین امتیازات موجودیت توسط کاربر/سرویس دهنده
+        USR1-53-1N7, Asr1-53-1N7
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+                
+        Description of endpoint:
+        "Get target_id, target_type from user/service provider. "
+        "If there is no record, returns none. else, it shows average score and number of scorers of an entity."
+        """,
+
+        parameters=[
+            OpenApiParameter(name="target_type", required=True, type=str, enum=models.Score.TARGET_TYPE_ENUM_SCORE_PARAM),
+            OpenApiParameter(name="target_id", required=True, type=int, description="Entity ID",),
+        ],
+        request = None,
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to fetch Average score of entity',
+                examples=[
+                    OpenApiExample(
+                        'Fetch average score Example',
+                        value=swagger_example_values.get_average_score_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def get(self, request, *args, **kwargs):
+        target_type = request.query_params.get("target_type")
+        target_id = request.query_params.get("target_id")
+
+        if not target_type or not target_id:
+            return Response(
+                {"detail": "target_type و target_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        qs = models.Score.objects.filter(
+            target_type=target_type,
+            target_id=target_id,
+        )
+        agg = qs.aggregate(avg_score=Avg("score"))
+        avg_value = agg["avg_score"] 
+        count = qs.count()
+
+        obj = {
+            "target_type": target_type,
+            "target_id": int(target_id),
+            "average": avg_value,
+            "count": count,
+        }
+        return Response(inoSerializers.score.ScoreAverageSerializer(obj).data, status=status.HTTP_200_OK)
+"""
+****************************************** Followers list *******************************************************************
+"""
+class FollowersListView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["All actor: Follow List - Code: 1-53-1"],
+        summary="Get followers list of user/industry/university/business/service/product by actor",
+        description=f"""
+        Last Version Update: 1.0.0
+
+        SRS Codes: 
+        مشاهده لیست دنبال کنندگان یک موجودیت توسط کاربر/سرویس دهنده
+        USR1-53-1N8, Asr1-53-1N8
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+
+        Description of endpoint:
+        "Get target_id, target_type from user/service provider. "
+        "api returns list of followers of entity."
+        """,
+
+        parameters=[
+            OpenApiParameter(name="target_type", required=True, type=str, enum=models.Follow.TARGET_TYPE_ENUM_FOLLOW_PARAM),
+            OpenApiParameter(name="target_id", required=True, type=int, description="target's ID",),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to fetch List of followers.',
+                examples=[
+                    OpenApiExample(
+                        'Fetch list of followers of entity Example',
+                        value=swagger_example_values.get_followers_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def get(self, request, *args, **kwargs):
+        target_type = request.query_params.get("target_type")
+        target_id = request.query_params.get("target_id")
+
+        if not target_type or not target_id:
+            return Response(
+                {"detail": "target_type و target_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        qs = models.Follow.objects.filter(
+            target_type=target_type,
+            target_id=target_id,
+            is_active=True,
+        )
+        results = [
+            {"actor_type": f.actor_type, "actor_id": f.actor_id, "created_at": f.created_at, "updated_at": f.updated_at}
+            for f in qs
+        ]
+        data = {
+            "target_type": target_type,
+            "target_id": int(target_id),
+            "count": len(results),
+            "results": results,
+        }
+        out_serializer = inoSerializers.follow.FollowersListSerializer(data)
+        return Response(out_serializer.data, status=status.HTTP_200_OK)
+"""
+****************************************** Followings list *******************************************************************
+"""
+class FollowingsListView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["All actor: Follow List - Code: 1-53-1"],
+        summary="Get followings list of user/industry/university/business by actor",
+        description=f"""
+        Last Version Update: 1.0.0
+
+        SRS Codes: 
+        مشاهده لیست دنبال شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
+        USR1-53-1N9, Asr1-53-1N9
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+
+        Description of endpoint:
+        "Get actor_id, actor_type from user/service provider. "
+        "api returns list of followings of entity."
+        """,
+
+        parameters=[
+            OpenApiParameter(name="actor_type", required=True, type=str, enum=models.Follow.ACTOR_TYPE_ENUM_FOLLOW_PARAM),
+            OpenApiParameter(name="actor_id", required=True, type=int, description="actor's ID",),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to fetch followings list',
+                examples=[
+                    OpenApiExample(
+                        'Fetch list of followings of entity Example.',
+                        value=swagger_example_values.get_followings_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def get(self, request, *args, **kwargs):
+        actor_type = request.query_params.get("actor_type")
+        actor_id = request.query_params.get("actor_id")
+
+        if not actor_type or not actor_id:
+            return Response(
+                {"detail": "actor_type و actor_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        qs = models.Follow.objects.filter(
+            actor_type=actor_type,
+            actor_id=actor_id,
+            is_active=True,
+        )
+        results = [
+            {"target_type": f.target_type, "target_id": f.target_id, "created_at": f.created_at, "updated_at": f.updated_at}
+            for f in qs
+        ]
+        data = {
+            "actor_type": actor_type,
+            "actor_id": int(actor_id),
+            "count": len(results),
+            "results": results,
+        }
+        out_serializer = inoSerializers.follow.FollowingsListSerializer(data)
+        return Response(out_serializer.data, status=status.HTTP_200_OK)
+"""
+****************************************** Likers list *******************************************************************
+"""
+class LikersListView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["All actor: Like List - Code: 1-53-1"],
+        summary="Get likers list of user/industry/university/business/service/product/comment by actor",
+        description=f"""
+        Last Version Update: 1.0.0
+
+        SRS Codes: 
+        مشاهده لیست پسند کنندگان یک موجودیت توسط کاربر/سرویس دهنده
+        USR1-53-1N10, Asr1-53-1N10
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+
+        Description of endpoint:
+        "Get target_id, target_type from user/service provider. "
+        "api returns list of likers of entity."
+        """,
+
+        parameters=[
+            OpenApiParameter(name="target_type", required=True, type=str, enum=models.Like.TARGET_TYPE_ENUM_LIKE_PARAM),
+            OpenApiParameter(name="target_id", required=True, type=int, description="target's ID",),
+        ],
+        responses = {
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to fetch likers list',
+                examples=[
+                    OpenApiExample(
+                        'Fetch list of likers of entity Example',
+                        value=swagger_example_values.get_likers_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def get(self, request, *args, **kwargs):
+        target_type = request.query_params.get("target_type")
+        target_id = request.query_params.get("target_id")
+
+        if not target_type or not target_id:
+            return Response(
+                {"detail": "target_type و target_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        qs = models.Like.objects.filter(
+            target_type=target_type,
+            target_id=target_id,
+            like_status="like",
+        )
+        results = [
+            {"actor_type": obj.actor_type, "actor_id": obj.actor_id, "created_at": obj.created_at, "updated_at": obj.updated_at}
+            for obj in qs
+        ]
+        data = {
+            "target_type": target_type,
+            "target_id": int(target_id),
+            "count": len(results),
+            "results": results,
+        }
+        serializer = inoSerializers.like.LikersListSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+"""
+****************************************** Likees list *******************************************************************
+"""
+class LikeesListView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["All actor: Like List - Code: 1-53-1"],
+        summary="Get likees list of user/industry/university/business by actor",
+        description=f"""
+        Last Version Update: 1.0.0
+
+        SRS Codes: 
+        مشاهده لیست پسند شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
+        USR1-53-1N11, Asr1-53-1N11
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+
+        Description of endpoint:
+        "Get actor_id, actor_type from user/service provider. "
+        "api returns list of likees of entity."
+        """,
+
+        parameters=[
+            OpenApiParameter(name="actor_type", required=True, type=str, enum=models.Like.ACTOR_TYPE_ENUM_LIKE_PARAM),
+            OpenApiParameter(name="actor_id", required=True, type=int, description="actor's ID",),
+        ],
+        request = None,
+        responses = {
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to fetch likees list',
+                examples=[
+                    OpenApiExample(
+                        'Fetch list of likees of actor Example',
+                        value=swagger_example_values.get_likees_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def get(self, request, *args, **kwargs):
+        actor_type = request.query_params.get("actor_type")
+        actor_id = request.query_params.get("actor_id")
+
+        if not actor_type or not actor_id:
+            return Response(
+                {"detail": "actor_type و actor_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        qs = models.Like.objects.filter(
+            actor_type=actor_type,
+            actor_id=actor_id,
+            like_status="like",
+        )
+        results = [
+            {"target_type": obj.target_type, "target_id": obj.target_id, "created_at": obj.created_at, "updated_at": obj.updated_at}
+            for obj in qs
+        ]
+        data = {
+            "actor_type": actor_type,
+            "actor_id": int(actor_id),
+            "count": len(results),
+            "results": results,
+        }
+        serializer = inoSerializers.like.LikeesListSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+"""
+****************************************** Dislikers list *******************************************************************
+"""
+class DislikersListView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["All actor: Dislike List - Code: 1-53-1"],
+        summary="Get dislikers list of user/industry/university/business/service/product/comment by actor",
+        description=f"""
+        Last Version Update: 1.0.0
+
+        SRS Codes: 
+        مشاهده لیست نسپند کنندگان یک موجودیت توسط کاربر/سرویس دهنده
+        USR1-53-1N12, Asr1-53-1N12
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+
+        Description of endpoint:
+        "Get target_id, target_type from user/service provider. "
+        "api returns list of dislikers of entity."
+        """,
+
+        parameters=[
+            OpenApiParameter(name="target_type", required=True, type=str, enum=models.Like.TARGET_TYPE_ENUM_LIKE_PARAM),
+            OpenApiParameter(name="target_id", required=True, type=int, description="targets's ID",),
+        ],
+        request = None,
+        responses = {
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to fetch dislikers list',
+                examples=[
+                    OpenApiExample(
+                        'Fetch list of dislikers of entity Example',
+                        value=swagger_example_values.get_dislikers_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def get(self, request, *args, **kwargs):
+        target_type = request.query_params.get("target_type")
+        target_id = request.query_params.get("target_id")
+
+        if not target_type or not target_id:
+            return Response(
+                {"detail": "target_type و target_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        qs = models.Like.objects.filter(
+            target_type=target_type,
+            target_id=target_id,
+            like_status="dislike",
+        )
+        results = [
+            {"actor_type": obj.actor_type, "actor_id": obj.actor_id, "created_at": obj.created_at, "updated_at": obj.updated_at}
+            for obj in qs
+        ]
+        data = {
+            "target_type": target_type,
+            "target_id": int(target_id),
+            "count": len(results),
+            "results": results,
+        }
+        serializer = inoSerializers.like.DislikersListSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+"""
+****************************************** Dislikees list *******************************************************************
+"""
+class DislikeesListView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["All actor: Dislike List - Code: 1-53-1"],
+        summary="Get dislikees list of user/industry/university/business by actor",
+        description=f"""
+        Last Version Update: 1.0.0
+
+        SRS Codes: 
+        مشاهده لیست نپسند شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
+        USR1-53-1N13, Asr1-53-1N13
+
+        Change Log:
+        [Explanation about endpoint changes in endpoint]
+
+        Description of endpoint:
+        "Get actor_id, actor_type from user/service provider. "
+        "api returns list of dislikees of entity."
+        """,
+
+        parameters=[
+            OpenApiParameter(name="actor_type", required=True, type=str, enum=models.Like.ACTOR_TYPE_ENUM_LIKE_PARAM),
+            OpenApiParameter(name="actor_id", required=True, type=int, description="actor's ID",),
+        ],
+        request = None,
+        responses = {
+            200: OpenApiResponse(
+                response=serializers.NameResponseSerializer,
+                description='Example to fetch dislikees list',
+                examples=[
+                    OpenApiExample(
+                        'Fetch list of dislikees of entity Example',
+                        value=swagger_example_values.get_dislikees_example_successful,
+                    ),
+                ],
+            ),
+            400: open_api_response.responses_400,
+            500: open_api_response.responses_500,
+        },
+        deprecated=False
+    )
+    def get(self, request, *args, **kwargs):
+        actor_type = request.query_params.get("actor_type")
+        actor_id = request.query_params.get("actor_id")
+
+        if not actor_type or not actor_id:
+            return Response(
+                {"detail": "actor_type و actor_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        qs = models.Like.objects.filter(
+            actor_type=actor_type,
+            actor_id=actor_id,
+            like_status="dislike", 
+        )
+        results = [
+            {"target_type": obj.target_type, "target_id": obj.target_id, "created_at": obj.created_at, "updated_at": obj.updated_at}
+            for obj in qs
+        ]
+        data = {
+            "actor_type": actor_type,
+            "actor_id": int(actor_id),
+            "count": len(results),
+            "results": results,
+        }
+        serializer = inoSerializers.like.DislikeesListSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
