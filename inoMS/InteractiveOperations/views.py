@@ -109,7 +109,7 @@ class TestApi(APIView):
 #file response app core
 # translate
 """
-****************************************** Follow/Unfollow model *******************************************************************
+****************************************** Follow/Unfollow api *******************************************************************
 """
 class FollowView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
@@ -176,7 +176,7 @@ class FollowView(APIView):
 
         return Response(inoSerializers.follow.FollowSerializer(obj).data, status=status.HTTP_200_OK)
 """
-****************************************** Like/Dislike model *******************************************************************
+****************************************** Like/Dislike api *******************************************************************
 """
 class LikeView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -231,22 +231,39 @@ class LikeView(APIView):
         actor_type = serializer.validated_data['actor_type']
         target_id = serializer.validated_data['target_id']
         target_type = serializer.validated_data['target_type']
-        like_status = serializer.validated_data['like_status']
+        new_status = serializer.validated_data['like_status']  # like / dislike / none
 
         obj, created = models.Like.objects.get_or_create(
             actor_id=actor_id,
             actor_type=actor_type,
             target_id=target_id,
             target_type=target_type,
-            defaults={'like_status': like_status},
+            defaults={'like_status': new_status},
         )
-        if not created:
-            obj.status = like_status
-            obj.save()
 
-        return Response(inoSerializers.like.LikeSerializer(obj).data, status=status.HTTP_200_OK)
+        if not created:
+            old_status = obj.like_status  
+
+            if ((old_status == 'like' and new_status == 'dislike') or
+                (old_status == 'dislike' and new_status == 'like')):
+                return Response(
+                    # swagger_example_values.bad_change_from_like_to_dislike_or_viceversa,
+                    message="You cannot change reaction directly from 'like' to 'dislike' or vice versa. "
+                                "First set like_status='none', then send a new request.",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if old_status != new_status:
+                obj.like_status = new_status
+                obj.save(update_fields=['like_status'])
+
+        return Response(
+            inoSerializers.like.LikeSerializer(obj).data,
+            status=status.HTTP_200_OK,
+        )
+
 """
-****************************************** Share model *******************************************************************
+****************************************** Share api *******************************************************************
 """
 class ShareView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -342,7 +359,7 @@ class ShareView(APIView):
 
         return Response(inoSerializers.share.ShareSerializer(obj).data, status=status.HTTP_200_OK)
 """
-****************************************** Score model *******************************************************************
+****************************************** Score api *******************************************************************
 """
 class ScoreView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -405,7 +422,7 @@ class ScoreView(APIView):
 
         return Response(inoSerializers.score.ScoreSerializer(obj).data, status=status.HTTP_200_OK)
 """
-****************************************** Average score (get) *******************************************************************
+****************************************** Average score (get) api *******************************************************************
 """
 class ScoreAverageView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -474,7 +491,7 @@ class ScoreAverageView(APIView):
         }
         return Response(inoSerializers.score.ScoreAverageSerializer(obj).data, status=status.HTTP_200_OK)
 """
-****************************************** Followers list *******************************************************************
+****************************************** Followers list api *******************************************************************
 """
 class FollowersListView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -544,7 +561,7 @@ class FollowersListView(APIView):
         out_serializer = inoSerializers.follow.FollowersListSerializer(data)
         return Response(out_serializer.data, status=status.HTTP_200_OK)
 """
-****************************************** Followings list *******************************************************************
+****************************************** Followings list api *******************************************************************
 """
 class FollowingsListView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -614,7 +631,7 @@ class FollowingsListView(APIView):
         out_serializer = inoSerializers.follow.FollowingsListSerializer(data)
         return Response(out_serializer.data, status=status.HTTP_200_OK)
 """
-****************************************** Likers list *******************************************************************
+****************************************** Likers list api *******************************************************************
 """
 class LikersListView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -684,7 +701,7 @@ class LikersListView(APIView):
         serializer = inoSerializers.like.LikersListSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 """
-****************************************** Likees list *******************************************************************
+****************************************** Likees list api *******************************************************************
 """
 class LikeesListView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -755,7 +772,7 @@ class LikeesListView(APIView):
         serializer = inoSerializers.like.LikeesListSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 """
-****************************************** Dislikers list *******************************************************************
+****************************************** Dislikers list api *******************************************************************
 """
 class DislikersListView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -826,7 +843,7 @@ class DislikersListView(APIView):
         serializer = inoSerializers.like.DislikersListSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 """
-****************************************** Dislikees list *******************************************************************
+****************************************** Dislikees list api *******************************************************************
 """
 class DislikeesListView(APIView):
     # permission_classes = [IsAuthenticated]

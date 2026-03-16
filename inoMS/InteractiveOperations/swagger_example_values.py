@@ -51,32 +51,32 @@ create_unfollow_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_follow_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "actor_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business']"
-        ],
-        "actor_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business', 'product', 'service']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "is_active": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['true', 'false']"
-        ]
-    },
-}
+# bad_follow_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "actor_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business']"
+#         ],
+#         "actor_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business', 'product', 'service']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "is_active": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['true', 'false']"
+#         ]
+#     },
+# }
 
 # for 1n2, 1n3
 create_like_example_successful= {
@@ -119,32 +119,41 @@ update_to_none_reaction_example_successful = {
     "errors": {},
     "success": True,    
 }
-bad_like_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "actor_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business']",
-        ],
-        "actor_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business', 'product', 'service', 'comment']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "like_status": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['like', 'dislike', 'none']"
-        ]
-    },
-}
+# bad_change_from_like_to_dislike_or_viceversa = {
+#   "data": None,
+#   "success": False,
+#   "message": "You cannot change reaction directly from 'like' to 'dislike' or vice versa. "
+#                                 "First set like_status='none', then send a new request.",
+#   "status_code": 401,
+#   "errors": {}
+# }
+
+# bad_like_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "actor_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business']",
+#         ],
+#         "actor_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business', 'product', 'service', 'comment']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "like_status": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['like', 'dislike', 'none']"
+#         ]
+#     },
+# }
 
 #1n4, 1n5
 create_share_in_site_with_reason_example_successful = {
@@ -215,44 +224,45 @@ create_share_on_whatsapp_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_create_share_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "actor_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business']"
-        ],
-        "actor_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business', 'product', 'service']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "platform": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['in_site', 'telegram', 'whatsapp']"
-        ],
-        "destination_type": [
-            "این فیلد در صورتی که پلتفرم سایت نباشد باید خالی بماند"
-            "در صورتی که پلتفرم سایت باشد این فیلد باید از بین موارد زیر باید انتخاب شود"
-            "['user', 'university', 'industry', 'business']"
-        ],
-        "destination_id": [
-            "این فیلد در صورتی که پلتفرم سایت نباشد باید خالی بماند"
-            "در صورتی که پلتفرم سایت باشد این فیلد باید یک عدد مثبت باشد"
-        ],
-        "url": [
-            "این فیلد اختیاری است و باید یک URL معتبر باشد."
-        ]
-    },
-}
+# }
+# bad_create_share_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "actor_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business']"
+#         ],
+#         "actor_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business', 'product', 'service']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "platform": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['in_site', 'telegram', 'whatsapp']"
+#         ],
+#         "destination_type": [
+#             "این فیلد در صورتی که پلتفرم سایت نباشد باید خالی بماند"
+#             "در صورتی که پلتفرم سایت باشد این فیلد باید از بین موارد زیر باید انتخاب شود"
+#             "['user', 'university', 'industry', 'business']"
+#         ],
+#         "destination_id": [
+#             "این فیلد در صورتی که پلتفرم سایت نباشد باید خالی بماند"
+#             "در صورتی که پلتفرم سایت باشد این فیلد باید یک عدد مثبت باشد"
+#         ],
+#         "url": [
+#             "این فیلد اختیاری است و باید یک URL معتبر باشد."
+#         ]
+#     },
+# }
 
 #for 1n6
 
@@ -269,31 +279,31 @@ create_score_example_successful ={
     "errors": {},
     "success": True,
 }
-bad_create_score_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "actor_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business']"
-        ],
-        "actor_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['university', 'industry', 'business', 'product', 'service']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ],
-        "score": [
-            "این فیلد الزامی است و باید یک عدد بین 1 تا 5 باشد."
-        ]
-    },
-}
+# bad_create_score_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "actor_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business']"
+#         ],
+#         "actor_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['university', 'industry', 'business', 'product', 'service']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ],
+#         "score": [
+#             "این فیلد الزامی است و باید یک عدد بین 1 تا 5 باشد."
+#         ]
+#     },
+# }
 
 #1n7
 get_average_score_example_successful = {
@@ -311,21 +321,21 @@ get_average_score_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_get_average_score_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['university', 'industry', 'business', 'product', 'service']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ]
-    },
-}
+# bad_get_average_score_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['university', 'industry', 'business', 'product', 'service']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ]
+#     },
+# }
 
 #1n8
 get_followers_example_successful = {
@@ -348,21 +358,21 @@ get_followers_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_get_followers_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business', 'product', 'service']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ]
-    },
-}
+# bad_get_followers_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business', 'product', 'service']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ]
+#     },
+# }
 
 #1n9    
 get_followings_example_successful = {
@@ -385,21 +395,21 @@ get_followings_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_get_followings_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "actor_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business']"
-        ],
-        "actor_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ]
-    },
-}
+# bad_get_followings_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "actor_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business']"
+#         ],
+#         "actor_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ]
+#     },
+# }
 
 #1n10
 get_likers_example_successful = {
@@ -422,21 +432,21 @@ get_likers_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_get_likers_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business', 'product', 'service', 'comment']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ]
-    },
-}
+# bad_get_likers_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business', 'product', 'service', 'comment']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ]
+#     },
+# }
 
 #1n11
 get_likees_example_successful = {
@@ -459,21 +469,21 @@ get_likees_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_get_likees_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "actor_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business']"
-        ],
-        "actor_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ]
-    },
-}
+# bad_get_likees_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "actor_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business']"
+#         ],
+#         "actor_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ]
+#     },
+# }
 
 #1n12
 get_dislikers_example_successful = {
@@ -496,21 +506,21 @@ get_dislikers_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_get_dislikers_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "target_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business', 'product', 'service', 'comment']"
-        ],
-        "target_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ]
-    },
-}
+# bad_get_dislikers_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "target_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business', 'product', 'service', 'comment']"
+#         ],
+#         "target_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ]
+#     },
+# }
 
 #1n13
 get_dislikees_example_successful = {
@@ -533,18 +543,18 @@ get_dislikees_example_successful = {
     "errors": {},
     "success": True,
 }
-bad_get_dislikees_request_example = {
-    "data": None,
-    "success": False,
-    "message": "Bad Request",
-    "status_code": 400,
-    "errors": {
-        "actor_type": [
-            "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
-            "['user', 'university', 'industry', 'business']"
-        ],
-        "actor_id": [
-            "این فیلد الزامی است و باید یک عدد مثبت باشد"
-        ]
-    },
-}
+# bad_get_dislikees_request_example = {
+#     "data": None,
+#     "success": False,
+#     "message": "Bad Request",
+#     "status_code": 400,
+#     "errors": {
+#         "actor_type": [
+#             "این فیلد الزامی است و باید یکی از مقادیر زیر باشد.",
+#             "['user', 'university', 'industry', 'business']"
+#         ],
+#         "actor_id": [
+#             "این فیلد الزامی است و باید یک عدد مثبت باشد"
+#         ]
+#     },
+# }
