@@ -1,4 +1,3 @@
-# inoMS/inoMS/urls.py
 """
 URL configuration for ProjectNameMS project.
 
@@ -19,11 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
-#added and should chaaaange parhummm
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,12 +26,6 @@ urlpatterns = [
     path('core/', include("core.urls")),
     path('ipc/', include("ipc.urls")),
     path('interactive-ops/', include("InteractiveOperations.urls")),
-
-
-    #parhum
-    # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    # path('o/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('o/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # path('system_setting/', include("system_setting.urls")),
     # path('report_log/', include("report_log.urls")),

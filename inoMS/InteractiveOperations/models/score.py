@@ -1,47 +1,57 @@
+# InteractiveOperations/models/score.py
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from .base_score import AbstractScoreBase
 
+# class UserScoreUser(AbstractScoreBase):
+#     class Meta:
+#         db_table = "interactive_user_score_user"
+#         unique_together = ("actor_id", "target_id")
+#         indexes = [
+#             models.Index(fields=["actor_id"]),
+#             models.Index(fields=["target_id"]),
+#         ]
 
-class Score(models.Model):
-    ACTOR_TYPE = [
-        ('user', 'User'),
-        ('business', 'Business'),
-        ('university', 'University'),
-        ('industry', 'Industry'),
-    ]
-    TARGET_TYPE = [
-        # ('user', 'User'), not in score
-        ('university', 'University'),
-        ('industry', 'Industry'),
-        ('business', 'Business'),
-        
-        ('product', 'Product'),
-        ('service', 'Service'),
-        # ('comment', 'Comment'),
-    ]
-
-    TARGET_TYPE_ENUM_SCORE_PARAM = [choice[0] for choice in TARGET_TYPE]
-    
-    actor_type = models.CharField(max_length=50,choices=ACTOR_TYPE)
-    actor_id = models.CharField(max_length=100)
-    target_type = models.CharField(max_length=50,choices=TARGET_TYPE)
-    target_id = models.CharField(max_length=100)
-    
-    score = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
-        
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
+class UserScoreServiceProvider(AbstractScoreBase):
     class Meta:
-        unique_together = [['actor_type', 'actor_id', 'target_type', 'target_id']]
-
-        
-        db_table = "interactive_score"
+        db_table = "interactive_user_score_service_provider"
+        unique_together = ("actor_id", "target_id")
         indexes = [
-            models.Index(fields=["target_type", "target_id"]),
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
         ]
 
-    def __str__(self):
-        return f"{self.target_type}:{self.target_id} -> {self.score}"
+class UserScoreOthers(AbstractScoreBase):
+    class Meta:
+        db_table = "interactive_user_score_others"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
+
+# class ServiceProviderScoreUser(AbstractScoreBase):
+#     class Meta:
+#         db_table = "interactive_sp_score_user"
+#         unique_together = ("actor_id", "target_id")
+#         indexes = [
+#             models.Index(fields=["actor_id"]),
+#             models.Index(fields=["target_id"]),
+#         ]
+
+class ServiceProviderScoreServiceProvider(AbstractScoreBase):
+    class Meta:
+        db_table = "interactive_sp_score_sp"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
+
+class ServiceProviderScoreOthers(AbstractScoreBase):
+    class Meta:
+        db_table = "interactive_sp_score_others"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]

@@ -1,50 +1,57 @@
+# InteractiveOperations/models/like.py
 from django.db import models
-# from .base import ActorType
-from core.enums import ActorType
+from .base_like import AbstractLikeBase
 
-
-class Like(models.Model):
-    ACTOR_TYPE = [
-        ('user', 'User'),
-        ('business', 'Business'),
-        ('university', 'University'),
-        ('industry', 'Industry'),
-    ]
-    TARGET_TYPE = [
-        ('user', 'User'),
-
-        ('business', 'Business'),
-        ('university', 'University'),
-        ('industry', 'Industry'),
-
-        ('product', 'Product'),
-        ('service', 'Service'),
-        
-        ('comment', 'Comment'),
-    ]
-    LIKE_STATUS= [
-        ('NONE', 'هیچکدام'),
-        ('LIKE', 'لایک'),
-        ('DISLIKE', 'دیسلایک'),
-    ]
-
-    ACTOR_TYPE_ENUM_LIKE_PARAM = [choice[0] for choice in ACTOR_TYPE]
-    TARGET_TYPE_ENUM_LIKE_PARAM = [choice[0] for choice in TARGET_TYPE]
-
-    actor_type = models.CharField(max_length=50, choices=ACTOR_TYPE)
-    actor_id = models.CharField(max_length=100)
-    target_type = models.CharField(max_length=50, choices=TARGET_TYPE)
-    target_id = models.CharField(max_length=100)
-    like_status = models.CharField(max_length=10, choices=LIKE_STATUS, default='LIKE')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+class UserLikeUser(AbstractLikeBase):
     class Meta:
-        unique_together = [['actor_type', 'actor_id', 'target_type', 'target_id']]
+        db_table = "interactive_user_like_user"
+        unique_together = ("actor_id", "target_id")
         indexes = [
-            models.Index(fields=['target_type', 'target_id', 'like_status']),
-            models.Index(fields=['actor_type', 'actor_id', 'like_status']),
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
         ]
-    
-    def __str__(self):
-        return f"{self.actor_type}:{self.actor_id} → {self.target_type}:{self.target_id}: {self.like_status}"
+
+class UserLikeServiceProvider(AbstractLikeBase):
+    class Meta:
+        db_table = "interactive_user_like_service_provider"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
+
+class UserLikeOthers(AbstractLikeBase):
+    class Meta:
+        db_table = "interactive_user_like_others"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
+
+class ServiceProviderLikeUser(AbstractLikeBase):
+    class Meta:
+        db_table = "interactive_sp_like_user"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
+
+class ServiceProviderLikeServiceProvider(AbstractLikeBase):
+    class Meta:
+        db_table = "interactive_sp_like_sp"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
+
+class ServiceProviderLikeOthers(AbstractLikeBase):
+    class Meta:
+        db_table = "interactive_sp_like_others"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]

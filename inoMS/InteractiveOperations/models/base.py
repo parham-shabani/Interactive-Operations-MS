@@ -14,8 +14,6 @@ class InteractionBase(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='تاریخ ایجاد')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاریخ بروزرسانی')
     
-    metadata = models.JSONField(default=dict,blank=True,verbose_name='اطلاعات اضافی')
-    
     class Meta:
         abstract = True
         ordering = ['-created_at']

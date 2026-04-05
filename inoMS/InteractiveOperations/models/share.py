@@ -1,27 +1,56 @@
 from django.db import models
-from core.enums import ActorType
+from .base_share import AbstractShareBase
 
-class SharePlatform(models.TextChoices):
-    IN_SITE = 'in_site', 'درون سایت'
-    TELEGRAM = 'telegram', 'تلگرام'
-    WHATSAPP = 'whatsapp', 'واتساپ'
+class UserShareUser(AbstractShareBase):
+    class Meta:
+        db_table = "interactive_user_share_user"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
 
+class UserShareServiceProvider(AbstractShareBase):
+    class Meta:
+        db_table = "interactive_user_share_service_provider"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
 
-# class ShareMethod(models.TextChoices):
-#     IN_SITE = 'in_site', 'درون سایت'
-#     EXTERNAL_APP = 'external_app', 'اپ دیگر'
+class UserShareOthers(AbstractShareBase):
+    class Meta:
+        db_table = "interactive_user_share_others"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
 
+class ServiceProviderShareUser(AbstractShareBase):
+    class Meta:
+        db_table = "interactive_sp_share_user"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
 
-class Share(models.Model):
-    actor_type = models.CharField(max_length=20, choices=ActorType.choices)
-    actor_id = models.CharField(max_length=100)
-    target_type = models.CharField(max_length=20, choices=ActorType.choices)
-    target_id = models.CharField(max_length=100)
-    platform = models.CharField(max_length=20, choices=SharePlatform.choices)
-    destination_type = models.CharField(max_length=20, choices=ActorType.choices, null=True, blank=True)
-    destination_id = models.CharField(max_length=100, null=True, blank=True)
-    url = models.URLField(default='')
-    #should change it later   i changed it at 09/11/1404   tavasote app url page gharar migirad
-    reason = models.TextField(null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class ServiceProviderShareServiceProvider(AbstractShareBase):
+    class Meta:
+        db_table = "interactive_sp_share_sp"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]
+
+class ServiceProviderShareOthers(AbstractShareBase):
+    class Meta:
+        db_table = "interactive_sp_share_others"
+        unique_together = ("actor_id", "target_id")
+        indexes = [
+            models.Index(fields=["actor_id"]),
+            models.Index(fields=["target_id"]),
+        ]

@@ -223,11 +223,7 @@ REST_FRAMEWORK = {
     
     
         "DEFAULT_AUTHENTICATION_CLASSES": [
-            # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-            #parhum
-
             "core.auth_tools.authentication.OAuth2BearerAuthentication",
-            # "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
         ],
 
 
@@ -240,7 +236,6 @@ REST_FRAMEWORK = {
     # ],
 }
 
-# DEFAULT_PROJECT_NAME = os.environ.get('DEFAULT_PROJECT_NAME')
 MICROSERVICE_NAME = os.environ.get('MICROSERVICE_NAME')
 SPECTACULAR_SETTINGS = {
     'TITLE': f'{MICROSERVICE_NAME} Microservice API',
@@ -302,28 +297,3 @@ JWT_CONFIGS: Dict = {
         "JWT_ISSUER": os.environ.get("JWT_ISSUER"),
     },
 }
-
-# JWT_CONFIGS = {
-#     "JWT_ALGORITHM": "HS256",
-#     "SECRET_KEY": SECRET_KEY,
-#     "PUBLIC_KEY": None,
-#     "PRIVATE_KEY": None,
-#     "JWT_OPTIONS": None,
-#     "JWT_KWARGS": {
-#         "JWT_AUDIENCE": "your_audience",
-#         "JWT_ISSUER": "your_issuer",
-#     },
-# }
-
-# from datetime import timedelta
-
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),  # مدت اعتبار توکن
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-#     'ROTATE_REFRESH_TOKENS': False,
-#     'BLACKLIST_AFTER_ROTATION': True,
-#     'ALGORITHM': 'HS256',
-#     'SIGNING_KEY': SECRET_KEY,
-#     'VERIFYING_KEY': None,
-#     'AUTH_HEADER_TYPES': ('Bearer',),
-# }

@@ -12,6 +12,5 @@ class TestNameClass:
 
         return result
 
-
 class NameClass:
     pass
