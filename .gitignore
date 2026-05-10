@@ -1,0 +1,47 @@
+
+# ********* Virtual Environment ***********
+venv/
+.env/
+.venv/
+env/
+
+# ********* Environment Variables *********
+.env
+.env.*
+
+# ********* Migrations ********************
+# Ignore all migration files
+**/migrations/*
+# Except __init__.py
+!**/migrations/__init__.py
+
+# ********* gRPC Generated Files **********
+#**/*_pb2.py
+#**/*_pb2_grpc.py
+
+# ********* Python Bytecode ***************
+__pycache__/
+*.py[cod]
+*$py.class
+.idea
+
+# ********* Django Specific ***************
+*.log
+*.pot
+*.pyc
+db.sqlite3
+*.sqlite3
+*.json
+media/
+staticfiles/
+static/
+
+# ********* Test / Coverage ***************
+.coverage
+.coverage.*
+.tox/
+.nox/
+htmlcov/
+.pytest_cache/
+nosetests.xml
+coverage.xml
