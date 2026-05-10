@@ -12,11 +12,8 @@ from core.auth_tools.loaders import ActorModel, current_user
 from core.responses import Response
 from core.open_api import open_api_change_log, open_api_response
 
-from InteractiveOperations import serializers, logics, swagger_example_values
-
-from InteractiveOperations import inoSerializers as inoSerializers                             # serializers
-from InteractiveOperations import models as models                                             # models
-from InteractiveOperations.modelsDbRelations.relations import InteractiveRelations as R        # DataBase relations
+from InteractiveOperations import logics, swagger_example_values
+from . import models, enums, serializers
 
 from django.db.models import Sum, Count
 from rest_framework.response import Response
@@ -100,8 +97,6 @@ class TestApi(APIView):
             status=status.HTTP_201_CREATED,
         )
     
-#file response app core
-# translate
 """
 ****************************************** Follow/Unfollow api *******************************************************************
 """
@@ -125,7 +120,7 @@ class FollowView(APIView):
            "Get actor_id, actor_type, target_id, target_type و is_active from user/service provider."
            "If there is no record, create new record. else, is_active will be updated."
            """,
-        request=inoSerializers.follow.FollowSerializer,
+        request=serializers.FollowSerializer,
         responses={
             200: OpenApiResponse(
                 response=serializers.NameResponseSerializer,
@@ -147,7 +142,7 @@ class FollowView(APIView):
         deprecated=False
     )
     def post(self, request, *args, **kwargs):
-        serializer = inoSerializers.follow.FollowSerializer(data=request.data)
+        serializer = serializers.FollowSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         actor_type = serializer.validated_data["actor_type"]     # user / business / university / industry
@@ -156,15 +151,16 @@ class FollowView(APIView):
         target_id = serializer.validated_data["target_id"]
         is_active = serializer.validated_data.get("is_active", True)
 
+        
         try:
-            actor_group = R._normalize_actor_group(actor_type)
-            target_group = R._normalize_target_group(target_type)
+            actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
+            target_group = models.InteractiveRelations._normalize_target_group(target_type)
         except ValueError as e:
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        model_class = R.FOLLOW_MODEL_MAP.get((actor_group, target_group))
+        model_class = models.InteractiveRelations.FOLLOW_MODEL_MAP.get((actor_group, target_group))
         if not model_class:
             return Response(
                 {"detail": "Unsupported actor/target combination."},
@@ -180,9 +176,9 @@ class FollowView(APIView):
         )
         if not created and obj.is_active != is_active:
             obj.is_active = is_active
-            obj.save(update_fields=["is_active"])
+            obj.save()
 
-        return Response(inoSerializers.follow.FollowSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializers.FollowSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 """
 ****************************************** Like/Dislike api *******************************************************************
 """
@@ -206,7 +202,7 @@ class LikeView(APIView):
            "Get actor_id, actor_type, target_id, target_type و like_status from user/service provider. "
             "If there is no record, create new record. else, like_status will be updated."
            """,
-        request=inoSerializers.like.LikeSerializer,
+        request=serializers.LikeSerializer,
         responses={
             200: OpenApiResponse(
                 response=serializers.NameResponseSerializer,
@@ -232,7 +228,7 @@ class LikeView(APIView):
         deprecated=False
     )
     def post(self, request, *args, **kwargs):
-        serializer = inoSerializers.like.LikeSerializer(data=request.data)
+        serializer = serializers.LikeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         actor_type = serializer.validated_data["actor_type"]     # user / business / university / industry
@@ -242,14 +238,14 @@ class LikeView(APIView):
         new_status = serializer.validated_data['like_status']    # like / dislike / none
 
         try:
-            actor_group = R._normalize_actor_group(actor_type)
-            target_group = R._normalize_target_group(target_type)
+            actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
+            target_group = models.InteractiveRelations._normalize_target_group(target_type)
         except ValueError as e:
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        model_class = R.LIKE_MODEL_MAP.get((actor_group, target_group))
+        model_class = models.InteractiveRelations.LIKE_MODEL_MAP.get((actor_group, target_group))
         if not model_class:
             return Response(
                 {"detail": "Unsupported actor/target combination."},
@@ -265,19 +261,19 @@ class LikeView(APIView):
         )
         if not created:
             old_status = obj.like_status  
-            if ((old_status == 'like' and new_status == 'dislike') or
-                (old_status == 'dislike' and new_status == 'like')):
+            if ((old_status == 1 and new_status == 3) or
+                (old_status == 3 and new_status == 1)):
                 return Response(
                     # swagger_example_values.bad_change_from_like_to_dislike_or_viceversa,
-                    message="You cannot change reaction directly from 'like' to 'dislike' or vice versa. "
-                                "First set like_status='none', then send a new request.",
+                    {"message": "You cannot change reaction directly from 'like' to 'dislike' or vice versa. "
+                                "First set like_status=2, then send a new request."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if old_status != new_status:
                 obj.like_status = new_status
-                obj.save(update_fields=['like_status'])
+                obj.save()
 
-        return Response(inoSerializers.like.LikeSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializers.LikeSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 """
 ****************************************** Share api *******************************************************************
 """
@@ -304,7 +300,7 @@ class ShareView(APIView):
             "Create new record."
             "destination_id, destination_type and reason could be null."
            """,
-        request = inoSerializers.share.ShareSerializer,
+        request = serializers.ShareSerializer,
         responses={
             200: OpenApiResponse(
                 response=serializers.NameResponseSerializer,
@@ -334,7 +330,7 @@ class ShareView(APIView):
         deprecated=False 
     )
     def post(self, request, *args, **kwargs):
-        serializer = inoSerializers.share.ShareSerializer(data=request.data)
+        serializer = serializers.ShareSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         actor_type = serializer.validated_data["actor_type"]     # user / business / university / industry
@@ -348,46 +344,34 @@ class ShareView(APIView):
         reason = serializer.validated_data.get('reason', None)
 
         try:
-            actor_group = R._normalize_actor_group(actor_type)
-            target_group = R._normalize_target_group(target_type)
+            actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
+            target_group = models.InteractiveRelations._normalize_target_group(target_type)
         except ValueError as e:
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        model_class = R.SHARE_MODEL_MAP.get((actor_group, target_group))
+        model_class = models.InteractiveRelations.SHARE_MODEL_MAP.get((actor_group, target_group))
         if not model_class:
             return Response(
                 {"detail": "Unsupported actor/target combination."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        obj, created = model_class.objects.get_or_create(
+        obj = model_class.objects.create(
             actor_id=actor_id,
-            actor_type = actor_type,
+            actor_type=actor_type,
             target_id=target_id,
-            target_type = target_type,
-            defaults={
-                'platform': platform,
-                'destination_type': destination_type,
-                'destination_id': destination_id,
-                'url': url,
-                'reason': reason,
-            },
+            target_type=target_type,
+            platform=platform,
+            destination_type=destination_type,
+            destination_id=destination_id,
+            url=url,
+            reason=reason,
         )
-        if not created:
-            obj.actor_id = actor_id
-            obj.actor_type = actor_type
-            obj.target_id = target_id
-            obj.target_type = target_type
-            obj.platform = platform
-            obj.destination_type = destination_type
-            obj.destination_id = destination_id
-            obj.url = url
-            obj.reason = reason
-            obj.save()
 
-        return Response(inoSerializers.share.ShareSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+        return Response(serializers.ShareSerializer(obj).data, status=status.HTTP_201_CREATED)
 """
 ****************************************** Score api *******************************************************************
 """
@@ -411,7 +395,7 @@ class ScoreView(APIView):
         "Get actor_id, actor_type, target_id, target_type و score from user/service provider. "
         "If there is no record, creates new record. else, score will be updated."
         """,
-        request=inoSerializers.score.ScoreSerializer,
+        request=serializers.ScoreSerializer,
         responses={
             200: OpenApiResponse(
                 response=serializers.NameResponseSerializer,
@@ -429,7 +413,7 @@ class ScoreView(APIView):
         deprecated=False
     )
     def post(self, request, *args, **kwargs):
-        serializer = inoSerializers.score.ScoreSerializer(data=request.data)
+        serializer = serializers.ScoreSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         actor_type = serializer.validated_data["actor_type"]     # user / business / university / industry
@@ -439,14 +423,14 @@ class ScoreView(APIView):
         score = serializer.validated_data['score']
 
         try:
-            actor_group = R._normalize_actor_group(actor_type)
-            target_group = R._normalize_target_group(target_type)
+            actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
+            target_group = models.InteractiveRelations._normalize_target_group(target_type)
         except ValueError as e:
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        model_class = R.SCORE_MODEL_MAP.get((actor_group, target_group))
+        model_class = models.InteractiveRelations.SCORE_MODEL_MAP.get((actor_group, target_group))
         if not model_class:
             return Response(
                 {"detail": "Unsupported actor/target combination."},
@@ -464,7 +448,7 @@ class ScoreView(APIView):
             obj.score = score
             obj.save()
 
-        return Response(inoSerializers.score.ScoreSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializers.ScoreSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 """
 ****************************************** Average score (get) api *******************************************************************
 """
@@ -489,7 +473,7 @@ class ScoreAverageView(APIView):
         "If there is no record, returns none. else, it shows average score and number of scorers of an entity."
         """,
         parameters=[
-            OpenApiParameter(name="target_type", required=True, type=str, enum=inoSerializers.score.ScoreSerializer.TARGET_TYPE_ENUM_SCORE_PARAM),
+            OpenApiParameter(name="target_type", required=True, type=str, enum=serializers.ScoreAverageSerializer.TARGET_TYPE_ENUM_SCORE_PARAM),
             OpenApiParameter(name="target_id", required=True, type=int, description="Entity ID",), ],
         request=None,
         responses={
@@ -514,27 +498,36 @@ class ScoreAverageView(APIView):
 
         if not target_type or not target_id:
             return Response(
-                {"detail": "target_type و target_id are required."},
+                {"detail": "target_type and target_id are required."},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        try:
+            target_type_int = int(target_type)
+            target_id = int(target_id)
+        except (TypeError, ValueError):
+            return Response(
+                {"message": "target_type and target_id must be int.",},status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        target_type_str = enums.TARGET_TYPE_INT_TO_STR.get(target_type_int)
+        if target_type_str is None:
+            return Response(
+                {"message": f"Unsupported target_type: {target_type_int}",},status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            target_group = R._normalize_target_group(target_type)
+            target_group = models.InteractiveRelations._normalize_target_group(target_type_str)
         except ValueError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model_classes = R.SCORE_AVERAGE_MAP.get(target_group)
+            return Response({"message": str(e),},status=status.HTTP_400_BAD_REQUEST,)
+        
+        model_classes = models.InteractiveRelations.SCORE_AVERAGE_MAP.get(target_group)
         if not model_classes:
-            return Response(
-                {"detail": "Unsupported target_type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"detail": f"Unsupported target_type: {target_type_int}",},status=status.HTTP_400_BAD_REQUEST,)
 
         total_score = 0
         total_count = 0
-        for model_class in model_classes:
-            qs = model_class.objects.filter(
+        for model in model_classes:
+            qs = model.objects.filter(
                 target_type=target_type,
                 target_id=target_id,
             )
@@ -554,6 +547,7 @@ class ScoreAverageView(APIView):
             "count": total_count,
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
 """
 ****************************************** Followers list api *******************************************************************
 """
@@ -578,7 +572,7 @@ class FollowersListView(APIView):
         "api returns list of followers of entity."
         """,
         parameters=[
-            OpenApiParameter(name="target_type", required=True, type=str, enum=inoSerializers.follow.FollowSerializer.TARGET_TYPE_ENUM_FOLLOW_PARAM),
+            OpenApiParameter(name="target_type", required=True, type=int, enum=serializers.FollowSerializer.TARGET_TYPE_ENUM_FOLLOW_PARAM),
             OpenApiParameter(name="target_id", required=True, type=int, description="target's ID",), ],
         responses={
             200: OpenApiResponse(
@@ -600,29 +594,38 @@ class FollowersListView(APIView):
         target_type = request.query_params.get("target_type")
         target_id = request.query_params.get("target_id")
 
-        if not target_type or not target_id:
-            return Response(
-                {"detail": "target_type و target_id are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if target_type is None or target_id is None:
+            return Response({"message": "target_type and target_id are required.",},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
         try:
-            target_group = R._normalize_target_group(target_type)
+            target_type_int = int(target_type)
+            target_id = int(target_id)
+        except (TypeError, ValueError):
+            return Response({"message": "target_type and target_id must be int.",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        target_type_str = enums.TARGET_TYPE_INT_TO_STR.get(target_type_int)
+        if target_type_str is None:
+            return Response(
+                {"message": f"Unsupported target_type: {target_type_int}",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        try:
+            target_group = models.InteractiveRelations._normalize_target_group(target_type_str)
         except ValueError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model_classes = R.FOLLOWER_LIST_MAP.get(target_group)
+            return Response({"message": str(e),},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
+        model_classes = models.InteractiveRelations.FOLLOWER_LIST_MAP.get(target_group)
         if not model_classes:
-            return Response(
-                {"detail": "Unsupported target_type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"message": f"Unsupported target_type: {target_type_int}",},
+                            status=status.HTTP_400_BAD_REQUEST,)
 
         followers = []
         for model_class in model_classes:
             qs = model_class.objects.filter(
-                target_type=target_type,
+                target_type=target_type_int,
                 target_id=target_id,
                 is_active=True,
             ).order_by("-last_updated_at")
@@ -633,12 +636,12 @@ class FollowersListView(APIView):
                     "last_updated_at": f.last_updated_at,
                 })
         data = {
-            "target_type": target_type,
-            "target_id": int(target_id),
+            "target_type": target_type_int,
+            "target_id": target_id,
             "count": len(followers),
             "results": followers,
         }
-        return Response(inoSerializers.follow.FollowersListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.FollowersListSerializer(data).data, status=status.HTTP_200_OK)
 """
 ****************************************** Followings list api *******************************************************************
 """
@@ -663,7 +666,7 @@ class FollowingsListView(APIView):
         "api returns list of followings of entity."
         """,
         parameters=[
-            OpenApiParameter(name="actor_type", required=True, type=str, enum=inoSerializers.follow.FollowSerializer.ACTOR_TYPE_ENUM_FOLLOW_PARAM),
+            OpenApiParameter(name="actor_type", required=True, type=int, enum=serializers.FollowSerializer.ACTOR_TYPE_ENUM_FOLLOW_PARAM),
             OpenApiParameter(name="actor_id", required=True, type=int, description="actor's ID",), ],
         responses={
             200: OpenApiResponse(
@@ -685,24 +688,33 @@ class FollowingsListView(APIView):
         actor_type = request.query_params.get("actor_type")
         actor_id = request.query_params.get("actor_id")
 
-        if not actor_type or not actor_id:
-            return Response(
-                {"detail": "actor_type و actor_id are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if actor_type is None or actor_id is None:
+            return Response({"message": "actor_type and actor_id are required.",},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
         try:
-            actor_group = R._normalize_target_group(actor_type)
+            actor_type_int = int(actor_type)
+            actor_id = int(actor_id)
+        except (TypeError, ValueError):
+            return Response({"message": "actor_type and actor_id must be int.",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        actor_type_str = enums.ACTOR_TYPE_INT_TO_STR.get(actor_type_int)
+        if actor_type_str is None:
+            return Response(
+                {"message": f"Unsupported target_type: {actor_type_int}",},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
+        try:
+            actor_group = models.InteractiveRelations._normalize_actor_group(actor_type_str)
         except ValueError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model_classes = R.FOLLOWING_LIST_MAP.get(actor_group)
+            return Response({"message": str(e),},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
+        model_classes = models.InteractiveRelations.FOLLOWER_LIST_MAP.get(actor_group)
         if not model_classes:
-            return Response(
-                {"detail": "Unsupported actor_type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"message": f"Unsupported target_type: {actor_type_int}",},
+                            status=status.HTTP_400_BAD_REQUEST,)
 
         followings = []
         for model_class in model_classes:
@@ -724,7 +736,7 @@ class FollowingsListView(APIView):
             "count": len(followings),
             "results": followings,
         }
-        return Response(inoSerializers.follow.FollowingsListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.FollowingsListSerializer(data).data, status=status.HTTP_200_OK)
 """
 ****************************************** Likers list api *******************************************************************
 """
@@ -734,23 +746,10 @@ class LikersListView(APIView):
     @extend_schema(
         tags=["All actor: Like List - Code: 1-53-1"],
         summary="Get likers list of user/industry/university/business/service/product/comment by actor",
-        description=f"""
-        Last Version Update: 1.0.0
-
-        SRS Codes: 
-        مشاهده لیست پسند کنندگان یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N10, Asr1-53-1N10
-
-        Change Log:
-        [Explanation about endpoint changes in endpoint]
-
-        Description of endpoint:
-        "Get target_id, target_type from user/service provider. "
-        "api returns list of likers of entity."
-        """,
         parameters=[
-            OpenApiParameter(name="target_type", required=True, type=str, enum=inoSerializers.like.LikeSerializer.TARGET_TYPE_ENUM_LIKE_PARAM),
-            OpenApiParameter(name="target_id", required=True, type=int, description="target's ID",), ],
+            OpenApiParameter(name="target_type",required=True,type=int,enum=serializers.LikeSerializer.TARGET_TYPE_ENUM_LIKE_PARAM,),
+            OpenApiParameter(name="target_id",required=True,type=int,description="target's ID",),
+        ],
         responses = {
             200: OpenApiResponse(
                 response=serializers.NameResponseSerializer,
@@ -771,45 +770,60 @@ class LikersListView(APIView):
         target_type = request.query_params.get("target_type")
         target_id = request.query_params.get("target_id")
 
-        if not target_type or not target_id:
-            return Response(
-                {"detail": "target_type و target_id are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            target_group = R._normalize_target_group(target_type)
-        except ValueError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model_classes = R.LIKER_LIST_MAP.get(target_group)
-        if not model_classes:
-            return Response(
-                {"detail": "Unsupported target_type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if target_type is None or target_id is None:
+            return Response({"message": "target_type and target_id are required.",},
+                status=status.HTTP_400_BAD_REQUEST,)
 
+        try:
+            target_type_int = int(target_type)
+            target_id = int(target_id)
+        except (TypeError, ValueError):
+            return Response({"message": "target_type and target_id must be int.",},
+                    status=status.HTTP_400_BAD_REQUEST,)
+
+        # out of range of our enums
+        target_type_str = enums.TARGET_TYPE_INT_TO_STR.get(target_type_int)
+        if target_type_str is None:
+            return Response({"message": f"Unsupported target_type: {target_type_int}",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        # find the group of actor/target (groups: user->user , bus/ind/uni->serviceProvider , service/product/comment->others)
+        try:
+            target_group = models.InteractiveRelations._normalize_target_group(target_type_str)
+        except ValueError as e:
+            return Response({"message": str(e),},
+                status=status.HTTP_400_BAD_REQUEST,)
+        # get related models
+        model_classes = models.InteractiveRelations.LIKER_LIST_MAP.get(target_group)
+        if not model_classes:
+            return Response({"message": f"Unsupported target_type: {target_type_int}",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        #search and append
         likers = []
         for model_class in model_classes:
             qs = model_class.objects.filter(
-                target_type=target_type,
+                target_type=target_type_int,
                 target_id=target_id,
-                like_status='like',
+                like_status=enums.LikeStatusEnum.LIKE,
             ).order_by("-last_updated_at")
-            for f in qs:
+
+            for obj in qs:
                 likers.append({
-                    "actor_type": f.actor_type,
-                    "actor_id": f.actor_id,
-                    "last_updated_at": f.last_updated_at,
+                    "actor_type": obj.actor_type,
+                    "actor_id": obj.actor_id,
+                    "last_updated_at": obj.last_updated_at,
                 })
+
+        # pass data to serializer
         data = {
-            "target_type": target_type,
-            "target_id": int(target_id),
+            "target_type": target_type_int,
+            "target_id": target_id,
             "count": len(likers),
             "results": likers,
         }
-        return Response(inoSerializers.like.LikersListSerializer(data).data, status=status.HTTP_200_OK)
+
+        return Response(serializers.LikersListSerializer(data).data,status=status.HTTP_200_OK,)
 """
 ****************************************** Likees list api *******************************************************************
 """
@@ -834,7 +848,7 @@ class LikeesListView(APIView):
         "api returns list of likees of entity."
         """,
         parameters=[
-            OpenApiParameter(name="actor_type", required=True, type=str, enum=inoSerializers.like.LikeSerializer.ACTOR_TYPE_ENUM_LIKE_PARAM),
+            OpenApiParameter(name="actor_type", required=True, type=int, enum=serializers.LikeSerializer.ACTOR_TYPE_ENUM_LIKE_PARAM),
             OpenApiParameter(name="actor_id", required=True, type=int, description="actor's ID",), ],
         request = None,
         responses = {
@@ -857,31 +871,40 @@ class LikeesListView(APIView):
         actor_type = request.query_params.get("actor_type")
         actor_id = request.query_params.get("actor_id")
 
-        if not actor_type or not actor_id:
-            return Response(
-                {"detail": "actor_type و actor_id are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if actor_type is None or actor_id is None:
+            return Response({"message": "actor_type and actor_id are required.",},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
         try:
-            actor_group = R._normalize_target_group(actor_type)
+            actor_type_int = int(actor_type)
+            actor_id = int(actor_id)
+        except (TypeError, ValueError):
+            return Response({"message": "actor_type and actor_id must be int.",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        actor_type_str = enums.ACTOR_TYPE_INT_TO_STR.get(actor_type_int)
+        if actor_type_str is None:
+            return Response(
+                {"message": f"Unsupported target_type: {actor_type_int}",},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
+        try:
+            actor_group = models.InteractiveRelations._normalize_actor_group(actor_type_str)
         except ValueError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model_classes = R.LIKEE_LIST_MAP.get(actor_group)
+            return Response({"message": str(e),},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
+        model_classes = models.InteractiveRelations.LIKEE_LIST_MAP.get(actor_group)
         if not model_classes:
-            return Response(
-                {"detail": "Unsupported actor_type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"message": f"Unsupported target_type: {actor_type_int}",},
+                            status=status.HTTP_400_BAD_REQUEST,)
 
         likees = []
         for model_class in model_classes:
             qs = model_class.objects.filter(
                 actor_type=actor_type,
                 actor_id=actor_id,
-                like_status = 'like'
+                like_status = enums.LikeStatusEnum.LIKE
             ).order_by("-last_updated_at")
             for f in qs:
                 likees.append({
@@ -895,7 +918,7 @@ class LikeesListView(APIView):
             "count": len(likees),
             "results": likees,
         }
-        return Response(inoSerializers.like.LikeesListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.LikeesListSerializer(data).data, status=status.HTTP_200_OK)
 """
 ****************************************** Dislikers list api *******************************************************************
 """
@@ -920,7 +943,7 @@ class DislikersListView(APIView):
         "api returns list of dislikers of entity."
         """,
         parameters=[
-            OpenApiParameter(name="target_type", required=True, type=str, enum=inoSerializers.like.LikeSerializer.TARGET_TYPE_ENUM_LIKE_PARAM),
+            OpenApiParameter(name="target_type", required=True, type=int, enum=serializers.LikeSerializer.TARGET_TYPE_ENUM_LIKE_PARAM),
             OpenApiParameter(name="target_id", required=True, type=int, description="targets's ID",), ],
         request = None,
         responses = {
@@ -943,37 +966,44 @@ class DislikersListView(APIView):
         target_type = request.query_params.get("target_type")
         target_id = request.query_params.get("target_id")
 
-        if not target_type or not target_id:
-            return Response(
-                {"detail": "target_type و target_id are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if target_type is None or target_id is None:
+            return Response({"message": "target_type و target_id الزامی هستند.",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
         try:
-            target_group = R._normalize_target_group(target_type)
+            target_type_int = int(target_type)
+            target_id = int(target_id)
+        except (TypeError, ValueError):
+            return Response({"message": "target_type و target_id باید عدد صحیح باشند.",},
+                    status=status.HTTP_400_BAD_REQUEST,)
+
+        target_type_str = enums.TARGET_TYPE_INT_TO_STR.get(target_type_int)
+        if target_type_str is None:
+            return Response({"message": f"Unsupported target_type: {target_type_int}",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        try:
+            target_group = models.InteractiveRelations._normalize_target_group(target_type_str)
         except ValueError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model_classes = R.LIKER_LIST_MAP.get(target_group)
+            return Response({"message": str(e),},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        model_classes = models.InteractiveRelations.LIKER_LIST_MAP.get(target_group)
         if not model_classes:
-            return Response(
-                {"detail": "Unsupported target_type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"message": f"Unsupported target_type: {target_type_int}",},
+                status=status.HTTP_400_BAD_REQUEST,)
 
         dislikers = []
         for model_class in model_classes:
             qs = model_class.objects.filter(
                 target_type=target_type,
                 target_id=target_id,
-                like_status='dislike',
+                like_status=enums.LikeStatusEnum.DISLIKE,
             ).order_by("-last_updated_at")
             for f in qs:
                 dislikers.append({
                     "actor_type": f.actor_type,
                     "actor_id": f.actor_id,
-
                     "last_updated_at": f.last_updated_at,
                 })
         data = {
@@ -982,7 +1012,7 @@ class DislikersListView(APIView):
             "count": len(dislikers),
             "results": dislikers,
         }
-        return Response(inoSerializers.like.DislikersListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.DislikersListSerializer(data).data, status=status.HTTP_200_OK)
 """
 ****************************************** Dislikees list api *******************************************************************
 """
@@ -1007,7 +1037,7 @@ class DislikeesListView(APIView):
         "api returns list of dislikees of entity."
         """,
         parameters=[
-            OpenApiParameter(name="actor_type", required=True, type=str, enum=inoSerializers.like.LikeSerializer.ACTOR_TYPE_ENUM_LIKE_PARAM),
+            OpenApiParameter(name="actor_type", required=True, type=int, enum=serializers.LikeSerializer.ACTOR_TYPE_ENUM_LIKE_PARAM),
             OpenApiParameter(name="actor_id", required=True, type=int, description="actor's ID",), ],
         request = None,
         responses = {
@@ -1030,31 +1060,40 @@ class DislikeesListView(APIView):
         actor_type = request.query_params.get("actor_type")
         actor_id = request.query_params.get("actor_id")
 
-        if not actor_type or not actor_id:
-            return Response(
-                {"detail": "actor_type و actor_id are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if actor_type is None or actor_id is None:
+            return Response({"message": "actor_type and actor_id are required.",},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
         try:
-            actor_group = R._normalize_target_group(actor_type)
+            actor_type_int = int(actor_type)
+            actor_id = int(actor_id)
+        except (TypeError, ValueError):
+            return Response({"message": "actor_type and actor_id must be int.",},
+                status=status.HTTP_400_BAD_REQUEST,)
+
+        actor_type_str = enums.ACTOR_TYPE_INT_TO_STR.get(actor_type_int)
+        if actor_type_str is None:
+            return Response(
+                {"message": f"Unsupported target_type: {actor_type_int}",},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
+        try:
+            actor_group = models.InteractiveRelations._normalize_actor_group(actor_type_str)
         except ValueError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model_classes = R.LIKEE_LIST_MAP.get(actor_group)
+            return Response({"message": str(e),},
+                            status=status.HTTP_400_BAD_REQUEST,)
+
+        model_classes = models.InteractiveRelations.LIKEE_LIST_MAP.get(actor_group)
         if not model_classes:
-            return Response(
-                {"detail": "Unsupported actor_type."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"message": f"Unsupported target_type: {actor_type_int}",},
+                            status=status.HTTP_400_BAD_REQUEST,)
 
         dislikees = []
         for model_class in model_classes:
             qs = model_class.objects.filter(
                 actor_type=actor_type,
                 actor_id=actor_id,
-                like_status = 'dislike'
+                like_status = enums.LikeStatusEnum.DISLIKE
             ).order_by("-last_updated_at")
             for f in qs:
                 dislikees.append({
@@ -1068,4 +1107,4 @@ class DislikeesListView(APIView):
             "count": len(dislikees),
             "results": dislikees,
         }
-        return Response(inoSerializers.like.DislikeesListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.DislikeesListSerializer(data).data, status=status.HTTP_200_OK)
