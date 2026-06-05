@@ -151,7 +151,6 @@ class FollowView(APIView):
         target_id = serializer.validated_data["target_id"]
         is_active = serializer.validated_data.get("is_active", True)
 
-        
         try:
             actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
             target_group = models.InteractiveRelations._normalize_target_group(target_type)
@@ -357,7 +356,7 @@ class ShareView(APIView):
                 {"detail": "Unsupported actor/target combination."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        
         obj = model_class.objects.create(
             actor_id=actor_id,
             actor_type=actor_type,
@@ -369,7 +368,6 @@ class ShareView(APIView):
             url=url,
             reason=reason,
         )
-
 
         return Response(serializers.ShareSerializer(obj).data, status=status.HTTP_201_CREATED)
 """
@@ -547,7 +545,6 @@ class ScoreAverageView(APIView):
             "count": total_count,
         }
         return Response(response_data, status=status.HTTP_200_OK)
-
 """
 ****************************************** Followers list api *******************************************************************
 """
