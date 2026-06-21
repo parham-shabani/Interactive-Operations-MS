@@ -1,0 +1,17 @@
+include:
+  - project: stella/ci-templates
+    ref: main
+    file:
+      - build.yml
+      - deploy.yml
+
+variables:
+  MICRO_SERVICE: interactiveoperations
+  SERVICE_VERSION: V0.1.0.0
+  SERVICE_PORT: 5001
+  PROJECT_DIR: InteractiveoperationsMS
+  REPLICAS: 1
+
+stages:
+ - build
+ - deploy
