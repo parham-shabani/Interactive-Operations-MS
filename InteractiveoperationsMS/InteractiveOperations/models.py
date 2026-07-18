@@ -5,9 +5,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 import InteractiveOperations.enums as enums
 
 class AbstractFollowBase(models.Model):
-    actor_type = models.CharField(max_length=50)
+    actor_type = models.PositiveSmallIntegerField(choices=enums.ActorTypeBase)
     actor_id = models.PositiveBigIntegerField()
-    target_type = models.CharField(max_length=50)
+    target_type = models.PositiveSmallIntegerField(choices=enums.TargetTypeBase)
     target_id = models.PositiveBigIntegerField()
     is_active = models.BooleanField(default=True)
     last_updated_at = models.DateTimeField(auto_now=True)
@@ -28,9 +28,9 @@ class AbstractFollowBase(models.Model):
         ]
 
 class AbstractLikeBase(models.Model):
-    actor_type = models.CharField(max_length=50)
+    actor_type = models.PositiveSmallIntegerField(choices=enums.ActorTypeBase)
     actor_id = models.PositiveBigIntegerField()
-    target_type = models.CharField(max_length=50)
+    target_type = models.PositiveSmallIntegerField(choices=enums.TargetTypeLike)
     target_id = models.PositiveBigIntegerField()
     like_status = models.PositiveSmallIntegerField(
         choices=enums.LikeStatusEnum.choices,
@@ -54,9 +54,9 @@ class AbstractLikeBase(models.Model):
 
 
 class AbstractScoreBase(models.Model):
-    actor_type = models.CharField(max_length=50)
+    actor_type = models.PositiveSmallIntegerField(choices=enums.ActorTypeBase)
     actor_id = models.PositiveBigIntegerField()
-    target_type = models.CharField(max_length=50)
+    target_type = models.PositiveSmallIntegerField(choices=enums.TargetTypeScore)
     target_id = models.PositiveBigIntegerField()
     score = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
@@ -79,19 +79,18 @@ class AbstractScoreBase(models.Model):
 
 class AbstractShareBase(models.Model):
 
-    actor_type = models.CharField(max_length=50)
+    actor_type = models.PositiveSmallIntegerField(choices=enums.ActorTypeBase)
     actor_id = models.PositiveBigIntegerField()
-    target_type = models.CharField(max_length=50)
+    target_type = models.PositiveSmallIntegerField(choices=enums.TargetTypeBase)
     target_id = models.PositiveBigIntegerField()
     platform = models.PositiveSmallIntegerField(
         choices=enums.SharePlatformEnum.choices,
         default=enums.SharePlatformEnum.IN_SITE
     )
-    platform = models.CharField(max_length=50)
     destination_type = models.CharField(max_length=50, null=True, blank=True)
-    destination_id = models.PositiveBigIntegerField(null=True, blank=True)
-    url = models.URLField(default='')     #tavasote app url page gharar migirad
-    reason = models.TextField(null=True)
+    destination_id = models.PositiveSmallIntegerField(choices=enums.ActorTypeBase, null=True, blank=True)
+    url = models.URLField(blank=True, default='')     #tavasote app url page gharar migirad
+    reason = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now=True)
 
     class Meta:

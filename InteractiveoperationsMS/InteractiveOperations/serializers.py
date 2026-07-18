@@ -16,8 +16,8 @@ class NameResponseSerializer(BaseResponseSerializer):
     data = DataNameResponseSerializer()
 
 
-class BadResponseSerializer(BaseResponseSerializer):
-    data = DataNameResponseSerializer()
+# class BadResponseSerializer(BaseResponseSerializer):
+#     data = DataNameResponseSerializer()
 
 
 class SelfInteractionValidationMixin:
@@ -187,7 +187,7 @@ class ShareSerializer(serializers.Serializer):
     destination_type = serializers.ChoiceField(
         choices=enums.TargetTypeLike.choices,
         required=False,
-        allow_null=True
+        allow_null=True,
     )
     destination_id = serializers.IntegerField(required=False, allow_null=True)
 

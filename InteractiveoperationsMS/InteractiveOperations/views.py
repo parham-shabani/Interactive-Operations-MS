@@ -1,7 +1,4 @@
 # inoMS/InteractiveOperations/views.py
-from http.client import responses
-from rest_framework import status
-
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse
 from django.utils.translation import gettext_lazy as _
@@ -16,7 +13,7 @@ from InteractiveOperations import logics, swagger_example_values
 from . import models, enums, serializers
 
 from django.db.models import Sum, Count
-from rest_framework.response import Response
+# from rest_framework.response import Response
 from rest_framework import status
 
 logger = logging.getLogger(__name__)
@@ -260,12 +257,13 @@ class LikeView(APIView):
         )
         if not created:
             old_status = obj.like_status  
-            if ((old_status == 1 and new_status == 3) or
-                (old_status == 3 and new_status == 1)):
+            if ((old_status == enums.LikeStatusEnum.LIKE and new_status == enums.LikeStatusEnum.DISLIKE) or
+                (old_status == enums.LikeStatusEnum.DISLIKE and new_status == enums.LikeStatusEnum.LIKE)):
                 return Response(
-                    # swagger_example_values.bad_change_from_like_to_dislike_or_viceversa,
-                    {"message": "You cannot change reaction directly from 'like' to 'dislike' or vice versa. "
-                                "First set like_status=2, then send a new request."},
+                    message=(
+                        "You cannot change reaction directly from 'like' to 'dislike' "
+                        "or vice versa. First set like_status=2, then send a new request."
+                    ),
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if old_status != new_status:
@@ -708,7 +706,7 @@ class FollowingsListView(APIView):
             return Response({"message": str(e),},
                             status=status.HTTP_400_BAD_REQUEST,)
 
-        model_classes = models.InteractiveRelations.FOLLOWER_LIST_MAP.get(actor_group)
+        model_classes = models.InteractiveRelations.FOLLOWING_LIST_MAP.get(actor_group)
         if not model_classes:
             return Response({"message": f"Unsupported target_type: {actor_type_int}",},
                             status=status.HTTP_400_BAD_REQUEST,)

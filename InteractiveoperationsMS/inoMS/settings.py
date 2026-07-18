@@ -183,7 +183,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
 
-POSTGRES_DB_NAME = os.environ.get('POSTGRES_DB_NAME')
+POSTGRES_DB_NAME = os.environ.get('POSTGRES_DB')
 POSTGRES_USER = os.environ.get('POSTGRES_USER')
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST')
