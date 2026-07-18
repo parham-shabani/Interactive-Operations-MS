@@ -1,9 +1,15 @@
 # inoMS/InteractiveOperations/views.py
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Sum, Count
+
 import logging
 
+from InteractiveoperationsMS.core.utils.custom_pagination import StandardResultsSetPagination
 from core.auth_tools import permissions
 from core.auth_tools.loaders import ActorModel, current_user
 from core.responses import Response
@@ -12,9 +18,6 @@ from core.open_api import open_api_change_log, open_api_response
 from InteractiveOperations import logics, swagger_example_values
 from . import models, enums, serializers
 
-from django.db.models import Sum, Count
-# from rest_framework.response import Response
-from rest_framework import status
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +96,7 @@ class TestApi(APIView):
             data=result,
             status=status.HTTP_201_CREATED,
         )
-    
+     
 """
 ****************************************** Follow/Unfollow api *******************************************************************
 """
@@ -546,9 +549,9 @@ class ScoreAverageView(APIView):
 """
 ****************************************** Followers list api *******************************************************************
 """
-class FollowersListView(APIView):
+class FollowersListView(APIView, PageNumberPagination):
     # permission_classes = [IsAuthenticated]
-
+    pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Follow List - Code: 1-53-1"],
         summary="Get followers list of user/industry/university/business/service/product by actor",
@@ -640,9 +643,9 @@ class FollowersListView(APIView):
 """
 ****************************************** Followings list api *******************************************************************
 """
-class FollowingsListView(APIView):
+class FollowingsListView(APIView, PageNumberPagination):
     # permission_classes = [IsAuthenticated]
-
+    pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Follow List - Code: 1-53-1"],
         summary="Get followings list of user/industry/university/business by actor",
@@ -735,9 +738,9 @@ class FollowingsListView(APIView):
 """
 ****************************************** Likers list api *******************************************************************
 """
-class LikersListView(APIView):
+class LikersListView(APIView, PageNumberPagination):
     # permission_classes = [IsAuthenticated]
-
+    pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Like List - Code: 1-53-1"],
         summary="Get likers list of user/industry/university/business/service/product/comment by actor",
@@ -822,9 +825,9 @@ class LikersListView(APIView):
 """
 ****************************************** Likees list api *******************************************************************
 """
-class LikeesListView(APIView):
+class LikeesListView(APIView, PageNumberPagination):
     # permission_classes = [IsAuthenticated]
-
+    pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Like List - Code: 1-53-1"],
         summary="Get likees list of user/industry/university/business by actor",
@@ -917,9 +920,9 @@ class LikeesListView(APIView):
 """
 ****************************************** Dislikers list api *******************************************************************
 """
-class DislikersListView(APIView):
+class DislikersListView(APIView, PageNumberPagination):
     # permission_classes = [IsAuthenticated]
-
+    pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Dislike List - Code: 1-53-1"],
         summary="Get dislikers list of user/industry/university/business/service/product/comment by actor",
@@ -1011,9 +1014,9 @@ class DislikersListView(APIView):
 """
 ****************************************** Dislikees list api *******************************************************************
 """
-class DislikeesListView(APIView):
+class DislikeesListView(APIView, PageNumberPagination):
     # permission_classes = [IsAuthenticated]
-
+    pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Dislike List - Code: 1-53-1"],
         summary="Get dislikees list of user/industry/university/business by actor",
