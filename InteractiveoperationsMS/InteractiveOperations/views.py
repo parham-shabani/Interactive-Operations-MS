@@ -9,7 +9,7 @@ from django.db.models import Sum, Count
 
 import logging
 
-from InteractiveoperationsMS.core.utils.custom_pagination import StandardResultsSetPagination
+from core.utils.custom_pagination import StandardResultsSetPagination
 from core.auth_tools import permissions
 from core.auth_tools.loaders import ActorModel, current_user
 from core.responses import Response
