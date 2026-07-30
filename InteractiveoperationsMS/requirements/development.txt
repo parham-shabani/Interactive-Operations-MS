@@ -69,7 +69,5 @@ uritemplate==4.2.0
 urllib3==1.26.20
 vine==5.1.0
 wcwidth==0.2.14
-libpq-dev
-pg_config
 vine==5.1.0
 # gunicorn==20.1.0
