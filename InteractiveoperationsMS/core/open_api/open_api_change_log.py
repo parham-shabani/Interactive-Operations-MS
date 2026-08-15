@@ -5,21 +5,21 @@ import textwrap
 SETTING_CHANGE_LOG = textwrap.dedent("""
 ### Change Log: 
 
-### 📅 Date Of Update: 1404/12/02 
+### 📅 Date Of Update: 1405/05/19
 **Version:** 1.0.0  
 **List of New Endpoints:**  
 - `/app_name/test_api`
 - `/interactive-ops/follow`
-- `/interactive-ops/follow/followers/` 
-- `/interactive-ops/follow/followings/` 
+- `/interactive-ops/follow/followers` 
+- `/interactive-ops/follow/followings` 
 - `/interactive-ops/like`
-- `/interactive-ops/like/likers/`
-- `/interactive-ops/like/likees/`
-- `/interactive-ops/like/dislikers/`
-- `/interactive-ops/like/dislikees/`
-- `/interactive-ops/share/`
-- `/interactive-ops/score/`
-- `/interactive-ops/score/average/`                                    
+- `/interactive-ops/like/likers`
+- `/interactive-ops/like/likees`
+- `/interactive-ops/like/dislikers`
+- `/interactive-ops/like/dislikees`
+- `/interactive-ops/share`
+- `/interactive-ops/score`
+- `/interactive-ops/score/average`                                    
                                       
                                 
 

@@ -38,7 +38,7 @@ class TestToken(APIView):
         )
 
 class TestApi(APIView):
-    # permission_classes = [permissions.IsAdmin]
+    permission_classes = [permissions.IsAdmin]
 
     @extend_schema(
             tags=["Admin: Test Api - Code:Prf-16"],
@@ -101,7 +101,7 @@ class TestApi(APIView):
 ****************************************** Follow/Unfollow api *******************************************************************
 """
 class FollowView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
             tags=["All actor: Follow/unfollow an entitiy - Code: 1-53-1"],
@@ -111,7 +111,7 @@ class FollowView(APIView):
 
            SRS Codes: 
            دنبال کردن توسط کاربر یا سرویس دهنده
-           USR1-53-1N1, Asr1-53-1N1
+           USR1-53-2N1, Asr1-53-2N1, USR1-53-2N2, Asr1-53-2N2
 
            Change Log:
            [Explanation about endpoint changes in endpoint]
@@ -182,7 +182,7 @@ class FollowView(APIView):
 ****************************************** Like/Dislike api *******************************************************************
 """
 class LikeView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
             tags=["All actor: Like/Dislike an entity - Code: 1-53-1"],
@@ -192,7 +192,7 @@ class LikeView(APIView):
 
            SRS Codes: 
            ایجاد یا تغییر ری اکشن روی یک موجودیت توسط کاربر/سرویس دهنده
-           USR1-53-1N2, Asr1-53-1N2, USR1-53-1N3, Asr1-53-1N3
+           USR1-53-2N3, Asr1-53-2N3, USR1-53-2N4, Asr1-53-2N4, USR1-53-2N5, Asr1-53-2N5, USR1-53-2N6, Asr1-53-2N6
            
            Change Log:
            [Explanation about endpoint changes in endpoint]
@@ -278,7 +278,7 @@ class LikeView(APIView):
 ****************************************** Share api *******************************************************************
 """
 class ShareView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
             tags=["All actor: Share entity - Code: 1-53-1"],
@@ -288,9 +288,9 @@ class ShareView(APIView):
 
            SRS Codes:
            به اشتراک گذاری در سایت 
-           USR1-53-1N4, Asr1-53-1N4 
+           USR1-53-2N7, Asr1-53-2N7
            به اشتراک گذاری در دیگر پلتفرم ها
-           USR1-53-1N5, Asr1-53-1N5
+           USR1-53-2N8, Asr1-53-2N8
            
            Change Log:
            [Explanation about endpoint changes in endpoint]
@@ -375,7 +375,7 @@ class ShareView(APIView):
 ****************************************** Score api *******************************************************************
 """
 class ScoreView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
             tags=["All actor: Score entity - Code: 1-53-1"],
@@ -385,7 +385,7 @@ class ScoreView(APIView):
 
         SRS Codes:
         امتیازدهی به موجودیت توسط کاربر یا سرویس دهنده
-        Usr1-53-1N6, Asr1-53-1N6
+        Usr1-53-2N9, Asr1-53-2N9
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -452,7 +452,7 @@ class ScoreView(APIView):
 ****************************************** Average score (get) api *******************************************************************
 """
 class ScoreAverageView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
             tags=["All actor: Score entity - Code: 1-53-1"],
@@ -462,7 +462,7 @@ class ScoreAverageView(APIView):
 
         SRS Codes:
         مشاهده میانگین امتیازات موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N7, Asr1-53-1N7
+        ?? USR1-53-1N7, Asr1-53-1N7 ?? 
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -550,7 +550,7 @@ class ScoreAverageView(APIView):
 ****************************************** Followers list api *******************************************************************
 """
 class FollowersListView(APIView, PageNumberPagination):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated] 
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Follow List - Code: 1-53-1"],
@@ -560,13 +560,13 @@ class FollowersListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست دنبال کنندگان یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N8, Asr1-53-1N8
+        USR1-53-1N1, Asr1-53-1N1, Adm1-53-1N1
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
 
         Description of endpoint:
-        "Get target_id, target_type from user/service provider. "
+        "Get target_id, target_type from user/service provider/admin. "
         "api returns list of followers of entity."
         """,
         parameters=[
@@ -644,7 +644,7 @@ class FollowersListView(APIView, PageNumberPagination):
 ****************************************** Followings list api *******************************************************************
 """
 class FollowingsListView(APIView, PageNumberPagination):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Follow List - Code: 1-53-1"],
@@ -654,13 +654,13 @@ class FollowingsListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست دنبال شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N9, Asr1-53-1N9
+        USR1-53-1N2, Asr1-53-1N2, Adm1-53-1N2
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
 
         Description of endpoint:
-        "Get actor_id, actor_type from user/service provider. "
+        "Get actor_id, actor_type from user/service provider/admin . "
         "api returns list of followings of entity."
         """,
         parameters=[
@@ -739,11 +739,25 @@ class FollowingsListView(APIView, PageNumberPagination):
 ****************************************** Likers list api *******************************************************************
 """
 class LikersListView(APIView, PageNumberPagination):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Like List - Code: 1-53-1"],
         summary="Get likers list of user/industry/university/business/service/product/comment by actor",
+        description=f"""
+                Last Version Update: 1.0.0
+        
+                SRS Codes: 
+                مشاهده لیست پسند کنندگان یک موجودیت توسط کاربر/سرویس دهنده
+                USR1-53-1N3, Asr1-53-1N3, Adm1-53-1N3
+        
+                Change Log:
+                [Explanation about endpoint changes in endpoint]
+        
+                Description of endpoint:
+                "Get target_id, target_type from user/service provider/admin. "
+                "api returns list of followings of entity."
+                """,
         parameters=[
             OpenApiParameter(name="target_type",required=True,type=int,enum=serializers.LikeSerializer.TARGET_TYPE_ENUM_LIKE_PARAM,),
             OpenApiParameter(name="target_id",required=True,type=int,description="target's ID",),
@@ -826,7 +840,7 @@ class LikersListView(APIView, PageNumberPagination):
 ****************************************** Likees list api *******************************************************************
 """
 class LikeesListView(APIView, PageNumberPagination):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Like List - Code: 1-53-1"],
@@ -836,13 +850,13 @@ class LikeesListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست پسند شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N11, Asr1-53-1N11
+        USR1-53-1N4, Asr1-53-1N4, Adm1-53-1N4
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
 
         Description of endpoint:
-        "Get actor_id, actor_type from user/service provider. "
+        "Get actor_id, actor_type from user/service provider/admin . "
         "api returns list of likees of entity."
         """,
         parameters=[
@@ -921,7 +935,7 @@ class LikeesListView(APIView, PageNumberPagination):
 ****************************************** Dislikers list api *******************************************************************
 """
 class DislikersListView(APIView, PageNumberPagination):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Dislike List - Code: 1-53-1"],
@@ -931,13 +945,13 @@ class DislikersListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست نسپند کنندگان یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N12, Asr1-53-1N12
+        USR1-53-1N5, Asr1-53-1N5, Adm1-53-1N5
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
 
         Description of endpoint:
-        "Get target_id, target_type from user/service provider. "
+        "Get target_id, target_type from user/service provider/admin . "
         "api returns list of dislikers of entity."
         """,
         parameters=[
@@ -1015,7 +1029,7 @@ class DislikersListView(APIView, PageNumberPagination):
 ****************************************** Dislikees list api *******************************************************************
 """
 class DislikeesListView(APIView, PageNumberPagination):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Dislike List - Code: 1-53-1"],
@@ -1025,13 +1039,13 @@ class DislikeesListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست نپسند شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N13, Asr1-53-1N13
+        USR1-53-1N6, Asr1-53-1N6, Adm1-53-1N6
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
 
         Description of endpoint:
-        "Get actor_id, actor_type from user/service provider. "
+        "Get actor_id, actor_type from user/service provider/admin . "
         "api returns list of dislikees of entity."
         """,
         parameters=[

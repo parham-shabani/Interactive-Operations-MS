@@ -54,15 +54,15 @@ class SelfInteractionValidationMixin:
 class FollowSerializer(SelfInteractionValidationMixin, serializers.Serializer):
     actor_type = serializers.ChoiceField(
         choices=enums.ActorTypeBase.choices,
-        default=enums.ActorTypeBase.USER
-    )
-    actor_id = serializers.IntegerField(default=0)
+        required=True
+        )
+    actor_id = serializers.IntegerField(required=True)
     target_type = serializers.ChoiceField(
         choices=enums.TargetTypeBase.choices,
-        default=enums.TargetTypeBase.USER
-    )
-    target_id = serializers.IntegerField(default=0)
-    is_active = serializers.BooleanField(default=True)
+        required=True
+        )
+    target_id = serializers.IntegerField(required=True)
+    is_active = serializers.BooleanField(required=True)
 
     ACTOR_TYPE_ENUM_FOLLOW_PARAM = [choice[0] for choice in enums.ActorTypeBase.choices]
     TARGET_TYPE_ENUM_FOLLOW_PARAM = [choice[0] for choice in enums.TargetTypeBase.choices]
@@ -97,17 +97,17 @@ class FollowingsListSerializer(serializers.Serializer):
 class LikeSerializer(SelfInteractionValidationMixin, serializers.Serializer):
     actor_type = serializers.ChoiceField(
         choices=enums.ActorTypeBase.choices,
-        default=enums.ActorTypeBase.USER
+        required=True
     )
-    actor_id = serializers.IntegerField(default=0)
+    actor_id = serializers.IntegerField(required=True)
     target_type = serializers.ChoiceField(
         choices=enums.TargetTypeLike.choices,
-        default=enums.TargetTypeLike.USER
+        required=True
     )
-    target_id = serializers.IntegerField(default=0)
+    target_id = serializers.IntegerField(required=True)
     like_status = serializers.ChoiceField(
         choices=enums.LikeStatusEnum.choices,
-        default=enums.LikeStatusEnum.LIKE
+        required=True
     )
 
     ACTOR_TYPE_ENUM_LIKE_PARAM = [choice[0] for choice in enums.ActorTypeBase.choices]
@@ -169,19 +169,19 @@ class DislikeesListSerializer(serializers.Serializer):
 class ShareSerializer(serializers.Serializer):
     actor_type = serializers.ChoiceField(
         choices=enums.ActorTypeBase.choices,
-        default=enums.ActorTypeBase.USER
+        required=True
     )
-    actor_id = serializers.IntegerField(default=0)
+    actor_id = serializers.IntegerField(default=0, required=True)
 
     target_type = serializers.ChoiceField(
         choices=enums.TargetTypeLike.choices,
-        default=enums.TargetTypeLike.BUSINESS
+        required=True
     )
-    target_id = serializers.IntegerField(default=0)
+    target_id = serializers.IntegerField(required=True)
 
     platform = serializers.ChoiceField(
         choices=enums.SharePlatformEnum.choices,
-        default=enums.SharePlatformEnum.IN_SITE
+        required=True
     )
 
     destination_type = serializers.ChoiceField(
@@ -191,8 +191,8 @@ class ShareSerializer(serializers.Serializer):
     )
     destination_id = serializers.IntegerField(required=False, allow_null=True)
 
-    reason = serializers.CharField(required=False, default='', allow_blank=True)
-    url = serializers.URLField(required=False, default='', allow_blank=True)
+    reason = serializers.CharField(required=False, default='', allow_null=True, allow_blank=True)
+    url = serializers.URLField(required=False, default='', allow_null=True ,allow_blank=True)
     created_at = serializers.DateTimeField(read_only=True)
 
     def validate(self, attrs):
@@ -219,15 +219,17 @@ class ShareSerializer(serializers.Serializer):
 class ScoreSerializer(SelfInteractionValidationMixin, serializers.Serializer):
     actor_type = serializers.ChoiceField(
         choices=enums.ActorTypeBase.choices,
-        default=enums.ActorTypeBase.USER
+        default=enums.ActorTypeBase.USER,
+        required=True
     )
-    actor_id = serializers.IntegerField(default=0)
+    actor_id = serializers.IntegerField(default=0, required=True)
     target_type = serializers.ChoiceField(
         choices=enums.TargetTypeScore.choices,
-        default=enums.TargetTypeScore.BUSINESS
+        default=enums.TargetTypeScore.BUSINESS,
+        required=True
     )
-    target_id = serializers.IntegerField(default=0)
-    score = serializers.IntegerField(default=5)
+    target_id = serializers.IntegerField(default=0, required=True)
+    score = serializers.IntegerField(default=5, required=True)
 
     def validate_score(self, value):
         if not 1 <= value <= 5:
