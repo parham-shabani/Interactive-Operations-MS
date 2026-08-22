@@ -15,8 +15,7 @@ from core.auth_tools.loaders import ActorModel, current_user
 from core.responses import Response
 from core.open_api import open_api_change_log, open_api_response
 
-from InteractiveOperations import logics, swagger_example_values
-from . import models, enums, serializers
+from . import models, enums, serializers, logics, swagger_example_values
 
 
 logger = logging.getLogger(__name__)
