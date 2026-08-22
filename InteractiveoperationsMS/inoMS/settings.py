@@ -129,14 +129,7 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Daneshjoam_Ino_MS',
-        'USER': 'postgres',
-        'PASSWORD': 'hahayuyu',
-        'HOST': '127.0.0.1',  # or 'localhost'
-        'PORT': '5432',       # this is what your error shows
-    }
+
 }
 
 # Password validation
@@ -181,7 +174,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # //*************************** new_z ********************************************************************************
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
+# CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
+CSRF_TRUSTED_ORIGINS: List[str] = [os.environ.get("CSRF_TRUSTED_ORIGINS_1")]
 
 POSTGRES_DB_NAME = os.environ.get('POSTGRES_DB')
 POSTGRES_USER = os.environ.get('POSTGRES_USER')

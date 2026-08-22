@@ -171,7 +171,7 @@ class ShareSerializer(serializers.Serializer):
         choices=enums.ActorTypeBase.choices,
         required=True
     )
-    actor_id = serializers.IntegerField(default=0, required=True)
+    actor_id = serializers.IntegerField(required=True)
 
     target_type = serializers.ChoiceField(
         choices=enums.TargetTypeLike.choices,
@@ -219,17 +219,17 @@ class ShareSerializer(serializers.Serializer):
 class ScoreSerializer(SelfInteractionValidationMixin, serializers.Serializer):
     actor_type = serializers.ChoiceField(
         choices=enums.ActorTypeBase.choices,
-        default=enums.ActorTypeBase.USER,
+        # default=enums.ActorTypeBase.USER,
         required=True
     )
-    actor_id = serializers.IntegerField(default=0, required=True)
+    actor_id = serializers.IntegerField(required=True)
     target_type = serializers.ChoiceField(
         choices=enums.TargetTypeScore.choices,
-        default=enums.TargetTypeScore.BUSINESS,
+        # default=enums.TargetTypeScore.BUSINESS,
         required=True
     )
-    target_id = serializers.IntegerField(default=0, required=True)
-    score = serializers.IntegerField(default=5, required=True)
+    target_id = serializers.IntegerField(required=True)
+    score = serializers.IntegerField(required=True)
 
     def validate_score(self, value):
         if not 1 <= value <= 5:
@@ -244,8 +244,9 @@ class ScoreAverageSerializer(serializers.Serializer):
 
     target_type = serializers.ChoiceField(
         choices=enums.TargetTypeBase.choices,
-        default=enums.TargetTypeBase.BUSINESS
+        # default=enums.TargetTypeBase.BUSINESS
+        required=True
     )
-    target_id = serializers.IntegerField()
+    target_id = serializers.IntegerField(required=True)
     average = serializers.FloatField(allow_null=True)
     count = serializers.IntegerField()

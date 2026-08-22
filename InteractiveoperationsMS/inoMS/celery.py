@@ -3,9 +3,9 @@ import os
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ProjectNameMS.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inoMS.settings')
 # Create default Celery app
-app = Celery('ProjectNameMS')
+app = Celery('inoMS')
 
 # - namespace='CELERY' means all celery-related configuration keys should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
