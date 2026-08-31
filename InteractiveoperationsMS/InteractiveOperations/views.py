@@ -100,7 +100,7 @@ class TestApi(APIView):
 ****************************************** Follow/Unfollow api *******************************************************************
 """
 class FollowView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
 
     @extend_schema(
             tags=["All actor: Follow/unfollow an entitiy - Code: 1-53-1"],
@@ -181,7 +181,7 @@ class FollowView(APIView):
 ****************************************** Like/Dislike api *******************************************************************
 """
 class LikeView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
 
     @extend_schema(
             tags=["All actor: Like/Dislike an entity - Code: 1-53-1"],
@@ -277,7 +277,7 @@ class LikeView(APIView):
 ****************************************** Share api *******************************************************************
 """
 class ShareView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
 
     @extend_schema(
             tags=["All actor: Share entity - Code: 1-53-1"],
@@ -374,7 +374,7 @@ class ShareView(APIView):
 ****************************************** Score api *******************************************************************
 """
 class ScoreView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
 
     @extend_schema(
             tags=["All actor: Score entity - Code: 1-53-1"],
@@ -451,7 +451,7 @@ class ScoreView(APIView):
 ****************************************** Average score (get) api *******************************************************************
 """
 class ScoreAverageView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
 
     @extend_schema(
             tags=["All actor: Score entity - Code: 1-53-1"],
@@ -549,7 +549,7 @@ class ScoreAverageView(APIView):
 ****************************************** Followers list api *******************************************************************
 """
 class FollowersListView(APIView, PageNumberPagination):
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Follow List - Code: 1-53-1"],
@@ -643,7 +643,7 @@ class FollowersListView(APIView, PageNumberPagination):
 ****************************************** Followings list api *******************************************************************
 """
 class FollowingsListView(APIView, PageNumberPagination):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Follow List - Code: 1-53-1"],
@@ -738,7 +738,7 @@ class FollowingsListView(APIView, PageNumberPagination):
 ****************************************** Likers list api *******************************************************************
 """
 class LikersListView(APIView, PageNumberPagination):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Like List - Code: 1-53-1"],
@@ -839,7 +839,7 @@ class LikersListView(APIView, PageNumberPagination):
 ****************************************** Likees list api *******************************************************************
 """
 class LikeesListView(APIView, PageNumberPagination):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Like List - Code: 1-53-1"],
@@ -934,7 +934,7 @@ class LikeesListView(APIView, PageNumberPagination):
 ****************************************** Dislikers list api *******************************************************************
 """
 class DislikersListView(APIView, PageNumberPagination):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Dislike List - Code: 1-53-1"],
@@ -1028,7 +1028,7 @@ class DislikersListView(APIView, PageNumberPagination):
 ****************************************** Dislikees list api *******************************************************************
 """
 class DislikeesListView(APIView, PageNumberPagination):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdmin | permissions.IsActor]
     pagination_class = StandardResultsSetPagination
     @extend_schema(
         tags=["All actor: Dislike List - Code: 1-53-1"],
