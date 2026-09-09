@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestToken(APIView):
-    permission_classes = [permissions.IsAdmin | permissions.IsActor]
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
         tags=["All Actor: Test Token"],
