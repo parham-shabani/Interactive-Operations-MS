@@ -12,12 +12,12 @@ urlpatterns = [
     path('score', views.ScoreView.as_view(), name='score'),
     path('score/average', views.ScoreAverageView.as_view(), name='score_average'),
 
-    path("follow/followers/", views.FollowersListView.as_view(), name="followers-list"),
-    path("follow/followings/", views.FollowingsListView.as_view(), name="followings-list"),
+    path("follow/followers", views.FollowersListView.as_view(), name="followers-list"),
+    path("follow/followings", views.FollowingsListView.as_view(), name="followings-list"),
 
-    path("like/likers/", views.LikersListView.as_view(), name="likers-list"),
-    path("like/likees/", views.LikeesListView.as_view(), name="likees-list"),
+    path("like/likers", views.LikersListView.as_view(), name="likers-list"),
+    path("like/likees", views.LikeesListView.as_view(), name="likees-list"),
 
-    path("like/dislikers/", views.DislikersListView.as_view(), name="dislikers-list"),
-    path("like/dislikees/", views.DislikeesListView.as_view(), name="dislikees-list")
+    path("like/dislikers", views.DislikersListView.as_view(), name="dislikers-list"),
+    path("like/dislikees", views.DislikeesListView.as_view(), name="dislikees-list")
 ]

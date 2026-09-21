@@ -110,7 +110,7 @@ class FollowView(APIView):
 
            SRS Codes: 
            دنبال کردن توسط کاربر یا سرویس دهنده
-           USR1-53-2N1, Asr1-53-2N1, USR1-53-2N2, Asr1-53-2N2
+           Usr-Ino-2N1, Asr-Ino-2N1, Usr-Ino-2N2, Asr-Ino-2N2
 
            Change Log:
            [Explanation about endpoint changes in endpoint]
@@ -141,6 +141,7 @@ class FollowView(APIView):
         deprecated=False
     )
     def post(self, request, *args, **kwargs):
+        user: ActorModel | None = current_user(request=request)
         serializer = serializers.FollowSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -149,6 +150,14 @@ class FollowView(APIView):
         target_type = serializer.validated_data["target_type"]   # user / business / ... / service / product 
         target_id = serializer.validated_data["target_id"]
         is_active = serializer.validated_data.get("is_active", True)
+
+        if user is None:
+            return Response(data=None, message="Authentication credentials were not provided.", status=status.HTTP_401_UNAUTHORIZED)
+
+        authenticated_actor_id = int(user.id)
+        authenticated_actor_type = int(user.profile.type)
+        if (actor_id != authenticated_actor_id or actor_type != authenticated_actor_type):
+            return Response(message="Forbidden access", status=status.HTTP_403_FORBIDDEN)
 
         try:
             actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
@@ -176,7 +185,7 @@ class FollowView(APIView):
             obj.is_active = is_active
             obj.save()
 
-        return Response(serializers.FollowSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializers.FollowSerializer(obj).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Like/Dislike api *******************************************************************
 """
@@ -191,7 +200,8 @@ class LikeView(APIView):
 
            SRS Codes: 
            ایجاد یا تغییر ری اکشن روی یک موجودیت توسط کاربر/سرویس دهنده
-           USR1-53-2N3, Asr1-53-2N3, USR1-53-2N4, Asr1-53-2N4, USR1-53-2N5, Asr1-53-2N5, USR1-53-2N6, Asr1-53-2N6
+           Usr-Ino-2N3, Asr-Ino-2N3, Usr-Ino-2N4, Asr-Ino-2N4, Usr-Ino-2N5, Asr-Ino-2N5, Usr-Ino-2N6, Asr-Ino-2N6
+           Usr-Ino-2E7, Asr-Ino-2E7, Usr-Ino-2E8, Asr-Ino-2E8
            
            Change Log:
            [Explanation about endpoint changes in endpoint]
@@ -226,6 +236,8 @@ class LikeView(APIView):
         deprecated=False
     )
     def post(self, request, *args, **kwargs):
+        user: ActorModel | None = current_user(request=request)
+
         serializer = serializers.LikeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -234,6 +246,14 @@ class LikeView(APIView):
         target_type = serializer.validated_data["target_type"]   # user / business / ... / service / product / comment
         target_id = serializer.validated_data["target_id"]
         new_status = serializer.validated_data['like_status']    # like / dislike / none
+
+        if user is None:
+            return Response(data=None, message="Authentication credentials were not provided.", status=status.HTTP_401_UNAUTHORIZED)
+
+        authenticated_actor_id = int(user.id)
+        authenticated_actor_type = int(user.profile.type)
+        if (actor_id != authenticated_actor_id or actor_type != authenticated_actor_type):
+            return Response(message="Forbidden access", status=status.HTTP_403_FORBIDDEN)
 
         try:
             actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
@@ -272,7 +292,7 @@ class LikeView(APIView):
                 obj.like_status = new_status
                 obj.save()
 
-        return Response(serializers.LikeSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializers.LikeSerializer(obj).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Share api *******************************************************************
 """
@@ -287,9 +307,9 @@ class ShareView(APIView):
 
            SRS Codes:
            به اشتراک گذاری در سایت 
-           USR1-53-2N7, Asr1-53-2N7
+           Usr-Ino-2N7, Asr-Ino-2N7
            به اشتراک گذاری در دیگر پلتفرم ها
-           USR1-53-2N8, Asr1-53-2N8
+           Usr-Ino-2N8, Asr-Ino-2N8
            
            Change Log:
            [Explanation about endpoint changes in endpoint]
@@ -329,6 +349,8 @@ class ShareView(APIView):
         deprecated=False 
     )
     def post(self, request, *args, **kwargs):
+        user: ActorModel | None = current_user(request=request)
+
         serializer = serializers.ShareSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -341,6 +363,14 @@ class ShareView(APIView):
         destination_id = serializer.validated_data.get('destination_id', None)
         url = serializer.validated_data.get('url')
         reason = serializer.validated_data.get('reason', None)
+
+        if user is None:
+            return Response(data=None, message="Authentication credentials were not provided.", status=status.HTTP_401_UNAUTHORIZED)
+
+        authenticated_actor_id = int(user.id)
+        authenticated_actor_type = int(user.profile.type)
+        if (actor_id != authenticated_actor_id or actor_type != authenticated_actor_type):
+            return Response(message="Forbidden access", status=status.HTTP_403_FORBIDDEN)
 
         try:
             actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
@@ -369,7 +399,7 @@ class ShareView(APIView):
             reason=reason,
         )
 
-        return Response(serializers.ShareSerializer(obj).data, status=status.HTTP_201_CREATED)
+        return Response(serializers.ShareSerializer(obj).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Score api *******************************************************************
 """
@@ -384,7 +414,7 @@ class ScoreView(APIView):
 
         SRS Codes:
         امتیازدهی به موجودیت توسط کاربر یا سرویس دهنده
-        Usr1-53-2N9, Asr1-53-2N9
+        Usr-Ino-2N9, Asr-Ino-2N9
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -411,6 +441,8 @@ class ScoreView(APIView):
         deprecated=False
     )
     def post(self, request, *args, **kwargs):
+        user: ActorModel | None = current_user(request=request)
+
         serializer = serializers.ScoreSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -419,6 +451,14 @@ class ScoreView(APIView):
         target_type = serializer.validated_data["target_type"]   # business / ... / service / product 
         target_id = serializer.validated_data["target_id"]
         score = serializer.validated_data['score']
+
+        if user is None:
+            return Response(data=None, message="Authentication credentials were not provided.", status=status.HTTP_401_UNAUTHORIZED)
+
+        authenticated_actor_id = int(user.id)
+        authenticated_actor_type = int(user.profile.type)
+        if (actor_id != authenticated_actor_id or actor_type != authenticated_actor_type):
+            return Response(message="Forbidden access", status=status.HTTP_403_FORBIDDEN)
 
         try:
             actor_group = models.InteractiveRelations._normalize_actor_group(actor_type)
@@ -446,7 +486,7 @@ class ScoreView(APIView):
             obj.score = score
             obj.save()
 
-        return Response(serializers.ScoreSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializers.ScoreSerializer(obj).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Average score (get) api *******************************************************************
 """
@@ -461,7 +501,7 @@ class ScoreAverageView(APIView):
 
         SRS Codes:
         مشاهده میانگین امتیازات موجودیت توسط کاربر/سرویس دهنده
-        ?? USR1-53-1N7, Asr1-53-1N7 ?? 
+        ? USR1-Ino-?N?, Asr1-Ino-?N? Adm1-Ino-?N? ? 
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -544,7 +584,7 @@ class ScoreAverageView(APIView):
             "score": avg_value,
             "count": total_count,
         }
-        return Response(response_data, status=status.HTTP_200_OK)
+        return Response(response_data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Followers list api *******************************************************************
 """
@@ -559,7 +599,7 @@ class FollowersListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست دنبال کنندگان یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N1, Asr1-53-1N1, Adm1-53-1N1
+        Usr-Ino-1N1, Asr-Ino-1N1, Adm-Ino-1N1
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -638,7 +678,7 @@ class FollowersListView(APIView, PageNumberPagination):
             "count": len(followers),
             "results": followers,
         }
-        return Response(serializers.FollowersListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.FollowersListSerializer(data).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Followings list api *******************************************************************
 """
@@ -653,7 +693,7 @@ class FollowingsListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست دنبال شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N2, Asr1-53-1N2, Adm1-53-1N2
+        Usr-Ino-1N2, Asr-Ino-1N2, Adm-Ino-1N2
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -733,7 +773,7 @@ class FollowingsListView(APIView, PageNumberPagination):
             "count": len(followings),
             "results": followings,
         }
-        return Response(serializers.FollowingsListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.FollowingsListSerializer(data).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Likers list api *******************************************************************
 """
@@ -748,7 +788,7 @@ class LikersListView(APIView, PageNumberPagination):
         
                 SRS Codes: 
                 مشاهده لیست پسند کنندگان یک موجودیت توسط کاربر/سرویس دهنده
-                USR1-53-1N3, Asr1-53-1N3, Adm1-53-1N3
+                Usr-Ino-1N3, Asr-Ino-1N3, Adm-Ino-1N3
         
                 Change Log:
                 [Explanation about endpoint changes in endpoint]
@@ -834,7 +874,7 @@ class LikersListView(APIView, PageNumberPagination):
             "results": likers,
         }
 
-        return Response(serializers.LikersListSerializer(data).data,status=status.HTTP_200_OK,)
+        return Response(serializers.LikersListSerializer(data).data, message='OK', status=status.HTTP_200_OK,)
 """
 ****************************************** Likees list api *******************************************************************
 """
@@ -849,7 +889,7 @@ class LikeesListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست پسند شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N4, Asr1-53-1N4, Adm1-53-1N4
+        Usr-Ino-1N4, Asr-Ino-1N4, Adm-Ino-1N4
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -929,7 +969,7 @@ class LikeesListView(APIView, PageNumberPagination):
             "count": len(likees),
             "results": likees,
         }
-        return Response(serializers.LikeesListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.LikeesListSerializer(data).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Dislikers list api *******************************************************************
 """
@@ -944,7 +984,7 @@ class DislikersListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست نسپند کنندگان یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N5, Asr1-53-1N5, Adm1-53-1N5
+        Usr-Ino-1N5, Asr-Ino-1N5, Adm-Ino-1N5
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -1023,7 +1063,7 @@ class DislikersListView(APIView, PageNumberPagination):
             "count": len(dislikers),
             "results": dislikers,
         }
-        return Response(serializers.DislikersListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.DislikersListSerializer(data).data, message='OK', status=status.HTTP_200_OK)
 """
 ****************************************** Dislikees list api *******************************************************************
 """
@@ -1038,7 +1078,7 @@ class DislikeesListView(APIView, PageNumberPagination):
 
         SRS Codes: 
         مشاهده لیست نپسند شدگان توسط یک موجودیت توسط کاربر/سرویس دهنده
-        USR1-53-1N6, Asr1-53-1N6, Adm1-53-1N6
+        Usr-Ino-1N6, Asr-Ino-1N6, Adm-Ino-1N6
 
         Change Log:
         [Explanation about endpoint changes in endpoint]
@@ -1118,4 +1158,4 @@ class DislikeesListView(APIView, PageNumberPagination):
             "count": len(dislikees),
             "results": dislikees,
         }
-        return Response(serializers.DislikeesListSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(serializers.DislikeesListSerializer(data).data, message='OK', status=status.HTTP_200_OK)
